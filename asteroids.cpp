@@ -31,7 +31,7 @@ const float timeslice = 1.0f;
 const float gravity = -0.2f;
 #define PI 3.141592653589793
 #define ALPHA 1
-const int MAX_BULLETS = 11;
+const int MAX_BULLETS = 1111;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
 
 //-----------------------------------------------------------------------------
@@ -727,6 +727,20 @@ void physics()
 			}
 		}
 	}
+	if (gl.keys[XK_b]) {
+	    	a = g.ahead;
+		while(a) {
+
+		    Asteroid *savea = a->next;
+		    deleteAsteroid(&g, a);
+		    g.asterdestroyed++;
+		    a = savea;
+		    g.nasteroids--;
+
+
+		}
+
+	}
 	if (g.mouseThrustOn) {
 		//should thrust be turned off
 		struct timespec mtt;
@@ -752,8 +766,8 @@ void render()
 	ggprint8b(&r, 16, 0x00ffff00, "n asteroids destroyed: %i",
 		g.asterdestroyed);
 //	nick();
-	extern void showName(Rect r, int y_res);
-	showName(r, gl.yres);
+	//extern void showName(Rect r, int y_res);
+	//showName(r, gl.yres);
 	extern void johnDoe(Rect r, int y_res);
 	johnDoe(r, gl.yres);
 	//
