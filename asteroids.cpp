@@ -751,7 +751,11 @@ void render()
 	ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
 	ggprint8b(&r, 16, 0x00ffff00, "n asteroids destroyed: %i",
 		g.asterdestroyed);
-	nick();
+//	nick();
+	extern void showName(Rect r, int y_res);
+	showName(r, gl.yres);
+	extern void johnDoe(Rect r, int y_res);
+	johnDoe(r, gl.yres);
 	//
 	//-------------
 	//Draw the ship
