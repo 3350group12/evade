@@ -43,6 +43,7 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
 
 extern void nick_Lab7();
+extern int jtL_Lab7() ;
 
 class Global {
 public:
@@ -566,7 +567,8 @@ void physics()
 		b->pos[1] += b->vel[1];
 		//Check for collision with window edges
 		if (b->pos[0] < 0.0) {
-			b->pos[0] += (float)gl.xres;
+			
+            b->pos[0] += (float)gl.xres;
 		}
 		else if (b->pos[0] > (float)gl.xres) {
 			b->pos[0] -= (float)gl.xres;
@@ -855,6 +857,7 @@ void render()
 		++b;
 	}
 	nick_Lab7();
+    jtL_Lab7();
 }
 
 
