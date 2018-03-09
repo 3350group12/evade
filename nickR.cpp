@@ -22,19 +22,19 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 
 void nick_Lab7()
 {
-    void divide();
-    void divide_opt();
+    void nick_divide();
+    void nick_divide_opt();
 
     Rect r;
     r.bot = 430;
     r.left = 10;
     r.center = 0;
     ggprint8b(&r, 16, 0x0088bbff, "Nick Rosbrugh");
-    divide();
-    divide_opt();
+    nick_divide();
+    nick_divide_opt();
 }
 
-void divide()
+void nick_divide()
 {
     struct timespec start, end;
     static double diff = 0.0;
@@ -57,7 +57,7 @@ void divide()
     ggprint8b(&r, 16, 0x0088bbff, "timer____: %lf", diff);
 }
 
-void divide_opt()
+void nick_divide_opt()
 {
     struct timespec start, end;
     static double diff = 0.0;
