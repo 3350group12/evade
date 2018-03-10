@@ -14,6 +14,8 @@
 #include "fonts.h"
 #include "Asteroid.h"
 
+using namespace std;
+
 //Setup timers
 const double OOBILLION = 1.0 / 1e9;
 extern struct timespec timeStart, timeCurrent;
@@ -21,45 +23,60 @@ extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //--------------------------------------------------------------------
 
-typedef std::uint64_t u64;
+const uint64_t MAX  = 1 << 16 ;  
 
 int jtL_Lab7()
-{
-    int divide_JT();
-    int divide_opt_JT() ;	 
+{ 
+    void use_cout( const uint64_t ) ; 
+    void use_printf( const uint64_t ) ; 
 
     Rect r;
     r.bot = 200 ;
     r.left = 50;
     r.center = 0 ;
     ggprint8b( &r, 16, 0x00ffbbff, "JiannTyng Lu" );
-    divide_JT();
-    divide_opt_JT();
-
+    
+    // Start Profiling: [ printf( u++ ) vs cout << u++ ] 
+    use_printf ( MAX ) ;
+    use_cout( MAX ) ; 
 	return 0;
 }
 
-// Addineg -1 , 2 , -3, 4, -5, 6 , -7, -8 ........
-long long  addSequnece ( void ) 
-{
-		
-	
-	return 0;
+void use_printf( const uint64_t N ) 
+{ 
+    struct timespec start , end ;
+    static double diff = 0.0 ; 
+    clock_gettime( CLOCK_REALTIME, &start );
+    // Timed 0
+    for ( uint64_t u = 0 ; u < N ; )
+        printf("%lu\n",u++) ;  
+    clock_gettime( CLOCK_REALTIME, &end ) ; 
+    diff += timeDiff( &start, &end );
+
+    Rect r;
+    r.bot = 185 ;
+    r.left = 50;
+    r.center = 0 ;
+    ggprint8b( &r, 16, 0x00ffbbff, "timer_printf(): %lf", diff );
 }
 
-
-int divide_JT( void ) 
+void use_cout( const uint64_t N ) 
 {
-		
+    struct timespec start , end ;
+    static double diff = 0.0 ; 
+    clock_gettime( CLOCK_REALTIME, &start );
+    // Timed 0
+    for ( uint64_t u = 0 ; u < N ; )
+        cout << u++ <<'\n' ; 
+    clock_gettime( CLOCK_REALTIME, &end ) ; 
+    diff += timeDiff( &start, &end );
 
-	return 0;
+    Rect r;
+    r.bot = 170 ;
+    r.left = 50;
+    r.center = 0 ;
+    ggprint8b( &r, 16, 0x00ffbbff, "timer__cout<<: %lf", diff );
 }
-
-int divide_opt_JT ( void )
-{
-	return 0;
-} 
-
 
 
 
