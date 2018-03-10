@@ -21,14 +21,12 @@ extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //--------------------------------------------------------------------
 
-
-
-
+typedef std::uint64_t u64;
 
 int jtL_Lab7()
 {
     int divide_JT();
-    int divide_opt_JT() ;
+    int divide_opt_JT() ;	 
 
     Rect r;
     r.bot = 200 ;
@@ -38,13 +36,22 @@ int jtL_Lab7()
     divide_JT();
     divide_opt_JT();
 
+	return 0;
+}
 
+// Addineg -1 , 2 , -3, 4, -5, 6 , -7, -8 ........
+long long  addSequnece ( void ) 
+{
+		
+	
 	return 0;
 }
 
 
 int divide_JT( void ) 
 {
+		
+
 	return 0;
 }
 
