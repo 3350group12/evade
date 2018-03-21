@@ -768,8 +768,6 @@ void render()
 	ggprint8b(&r, 16, 0x00ffff00, "n asteroids destroyed: %i",
 		g.asterdestroyed);
 	
-	extern void johnDoe(Rect r, int y_res);
-	johnDoe(r, gl.yres);
 	//
 	//-------------
 	//Draw the ship
@@ -856,8 +854,6 @@ void render()
 		glEnd();
 		++b;
 	}
-	nick_Lab7();
-    jtL_Lab7();
 }
 
 
