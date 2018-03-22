@@ -1,4 +1,5 @@
 #include "Asteroid.h"
+#include "Bullet.h"
 #include "fonts.h"
 #include <GL/glx.h>
 #include <iostream>
@@ -106,3 +107,7 @@ bool checkPhysics(Asteroid *a)
 }
 
 
+void superifyBullet(Bullet *b) {
+	b->super = true;
+   	return;
+} 

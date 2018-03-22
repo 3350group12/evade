@@ -25,12 +25,14 @@ using namespace std;
 #include "log.h"
 #include "fonts.h"
 #include "Asteroid.h"
+#include "Bullet.h"
 
 //constants
 const float timeslice = 1.0f;
 const float gravity = -0.2f;
 #define PI 3.141592653589793
 #define ALPHA 1
+#define SUPER 100000
 const int MAX_BULLETS = 1111;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
 
@@ -76,15 +78,6 @@ public:
 	}
 };
 
-class Bullet {
-public:
-	Vec pos;
-	Vec vel;
-	float color[3];
-	struct timespec time;
-public:
-	Bullet() { }
-};
 
 
 class Game {
@@ -377,6 +370,7 @@ void check_mouse(XEvent *e)
 					b->color[0] = BULLET_COLOR;
 					b->color[1] = BULLET_COLOR;
 					b->color[2] = BULLET_COLOR;
+					b->super = false;
 					++g.nbullets;
 				}
 			}
@@ -620,7 +614,7 @@ void physics()
 			d0 = b->pos[0] - a->pos[0];
 			d1 = b->pos[1] - a->pos[1];
 			dist = (d0*d0 + d1*d1);
-			if (dist < (a->radius*a->radius)) {
+			if (dist < (a->radius*a->radius) && !b->super) {
 				//cout << "asteroid hit." << endl;
 				//this asteroid is hit.
 				if (a->radius > MINIMUM_ASTEROID_SIZE) {
@@ -654,9 +648,53 @@ void physics()
 					g.nasteroids--;
 				}
 				//delete the bullet...
-				memcpy(&g.barr[i], &g.barr[g.nbullets-1],
-					sizeof(Bullet));
-				g.nbullets--;
+				if(!b->super) {
+					memcpy(&g.barr[i], &g.barr[g.nbullets-1],
+						sizeof(Bullet));
+					g.nbullets--;
+				}
+				if (a == NULL)
+					break;
+			}
+			if (((dist - SUPER < (a->radius*a->radius)) || (dist + SUPER < (a->radius*a->radius)) || (dist < (a->radius*a->radius))) && b->super) {
+				//cout << "asteroid hit." << endl;
+				//this asteroid is hit.
+				if (a->radius > MINIMUM_ASTEROID_SIZE) {
+					//break it into pieces.
+					Asteroid *ta = a;
+					buildAsteroidFragment(ta, a);
+					int r = rand()%10+5;
+					for (int k=0; k<r; k++) {
+						//get the next asteroid position
+						//in the array
+						Asteroid *ta = new Asteroid;
+						buildAsteroidFragment(ta, a);
+						//add to front of asteroid
+						//linked list
+						ta->next = g.ahead;
+						if (g.ahead != NULL)
+							g.ahead->prev = ta;
+						g.ahead = ta;
+						g.nasteroids++;
+					}
+				} else {
+					a->color[0] = 1.0;
+					a->color[1] = 0.1;
+					a->color[2] = 0.1;
+					//asteroid is too small to break up
+					//delete the asteroid and bullet
+					Asteroid *savea = a->next;
+					deleteAsteroid(&g, a);
+					g.asterdestroyed++;
+					a = savea;
+					g.nasteroids--;
+				}
+				//delete the bullet...
+				if(!b->super) {
+					memcpy(&g.barr[i], &g.barr[g.nbullets-1],
+						sizeof(Bullet));
+					g.nbullets--;
+				}
 				if (a == NULL)
 					break;
 			}
@@ -741,6 +779,45 @@ void physics()
 
 
 		}
+
+	}
+	if (gl.keys[XK_v]) {
+		//a little time between each bullet
+		struct timespec bt;
+		clock_gettime(CLOCK_REALTIME, &bt);
+		double ts = timeDiff(&g.bulletTimer, &bt);
+		if (ts > 0.1) {
+			timeCopy(&g.bulletTimer, &bt);
+			if (g.nbullets < MAX_BULLETS) {
+				//shoot a bullet...
+				//Bullet *b = new Bullet;
+				Bullet *b = &g.barr[g.nbullets];
+				timeCopy(&b->time, &bt);
+				b->pos[0] = g.ship.pos[0];
+				b->pos[1] = g.ship.pos[1];
+				b->vel[0] = g.ship.vel[0];
+				b->vel[1] = g.ship.vel[1];
+				//convert ship angle to radians
+				Flt rad = ((g.ship.angle+90.0) / 360.0f) *
+				    PI * 2.0;
+				//convert angle to a vector
+				Flt xdir = cos(rad);
+				Flt ydir = sin(rad);
+				b->pos[0] += xdir*20.0f;
+				b->pos[1] += ydir*20.0f;
+				b->vel[0] += xdir*6.0f + rnd()*0.1;
+				b->vel[1] += ydir*6.0f + rnd()*0.1;
+				b->color[0] = 1.0f;
+				b->color[1] = 1.0f;
+				b->color[2] = 1.0f;
+				b->super = true;
+				g.nbullets++;
+			}
+		}
+					
+	
+
+
 
 	}
 	if (g.mouseThrustOn) {
