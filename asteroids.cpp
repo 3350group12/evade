@@ -30,6 +30,8 @@ using namespace std;
 //constants
 const float timeslice = 1.0f;
 const float gravity = -0.2f;
+const float ASTEROID_VEL_MAX = -10.0;
+const float SHIPSPEED = 10;
 #define PI 3.141592653589793
 #define ALPHA 1
 #define SUPER 100000
@@ -120,8 +122,10 @@ public:
 			a->color[0] = rnd();
 			a->color[1] = rnd();
 			a->color[2] = rnd();
-			a->vel[0] = (Flt)(rnd()*2.0-1.0);
-			a->vel[1] = (Flt)(rnd()*2.0-1.0);
+//			a->vel[0] = (Flt)(rnd()*2.0-1.0);
+//			a->vel[1] = (Flt)(rnd()*2.0-1.0);
+			a->vel[0] = 0;
+			a->vel[0] = 0;
 			//std::cout << "asteroid" << std::endl;
 			//add to front of linked list
 			a->next = ahead;
@@ -273,7 +277,7 @@ int main()
 		while (x11.getXPending()) {
 			XEvent e = x11.getXNextEvent();
 			x11.check_resize(&e);
-//			check_mouse(&e);
+			check_mouse(&e);
 			done = check_keys(&e);
 		}
 		physics();
@@ -357,16 +361,17 @@ void check_mouse(XEvent *e)
 					b->pos[1] = g.ship.pos[1];
 					b->vel[0] = g.ship.vel[0];
 					b->vel[1] = g.ship.vel[1];
+					b->vel[1] = 20;
 					//convert ship angle to radians
-					Flt rad = ((g.ship.angle+SHIFT_ANGLE) /
-						COMPLETE_ANGLE) * PI * 2.0;
-					//convert angle to a vector
-					Flt xdir = cos(rad);
-					Flt ydir = sin(rad);
-					b->pos[0] += xdir*SHIFT_POS;
-					b->pos[1] += ydir*SHIFT_POS;
-					b->vel[0] += xdir*SHIFT_VEL + rnd()*0.1;
-					b->vel[1] += ydir*SHIFT_VEL + rnd()*0.1;
+//					Flt rad = ((g.ship.angle+SHIFT_ANGLE) /
+//						COMPLETE_ANGLE) * PI * 2.0;
+//					//convert angle to a vector
+//					Flt xdir = cos(rad);
+//					Flt ydir = sin(rad);
+//					b->pos[0] += xdir*SHIFT_POS;
+//					b->pos[1] += ydir*SHIFT_POS;
+//					b->vel[0] += xdir*SHIFT_VEL + rnd()*0.1;
+//					b->vel[1] += ydir*SHIFT_VEL + rnd()*0.1;
 					b->color[0] = BULLET_COLOR;
 					b->color[1] = BULLET_COLOR;
 					b->color[2] = BULLET_COLOR;
@@ -386,42 +391,43 @@ void check_mouse(XEvent *e)
 			int ydiff = savey - e->xbutton.y;
 			if (++ct < 10)
 				return;		
-			if (xdiff > 0) {
+//			if (xdiff > 0) {
+			g.ship.pos[0] += -(float)xdiff;
 				//mouse moved along the x-axis.
-				g.ship.angle += 0.05f * (float)xdiff;
-				if (g.ship.angle >= COMPLETE_ANGLE)
-					g.ship.angle -= COMPLETE_ANGLE;
-			}
-			else if (xdiff < 0) {
-				g.ship.angle += 0.05f * (float)xdiff;
-				if (g.ship.angle < MIN_ANGLE)
-					g.ship.angle += COMPLETE_ANGLE;
-			}
-			if (ydiff > 0) {
-				//mouse moved along the y-axis.
-				//apply thrust
-				//convert ship angle to radians
-				Flt rad = ((g.ship.angle+SHIFT_ANGLE) /
-					COMPLETE_ANGLE) * PI * 2.0;
-				//convert angle to a vector
-				Flt xdir = cos(rad);
-				Flt ydir = sin(rad);
-				g.ship.vel[0] += xdir * (float)ydiff *
-				    SHIFT_OVER;
-				g.ship.vel[1] += ydir * (float)ydiff *
-				    SHIFT_OVER;
-				Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
-					g.ship.vel[1]*g.ship.vel[1]);
-				if (speed > SHIP_SPEED) {
-					speed = SHIP_SPEED;
-					normalize2d(g.ship.vel);
-					g.ship.vel[0] *= speed;
-					g.ship.vel[1] *= speed;
-				}
-				g.mouseThrustOn = true;
-				clock_gettime(CLOCK_REALTIME,
-					&g.mouseThrustTimer);
-			}
+//				g.ship.angle += 0.05f * (float)xdiff;
+//				if (g.ship.angle >= COMPLETE_ANGLE)
+//					g.ship.angle -= COMPLETE_ANGLE;
+//			}
+//			else if (xdiff < 0) {
+//				g.ship.angle += 0.05f * (float)xdiff;
+//				if (g.ship.angle < MIN_ANGLE)
+//					g.ship.angle += COMPLETE_ANGLE;
+//			}
+//			if (ydiff > 0) {
+//				//mouse moved along the y-axis.
+//				//apply thrust
+//				//convert ship angle to radians
+//				Flt rad = ((g.ship.angle+SHIFT_ANGLE) /
+//					COMPLETE_ANGLE) * PI * 2.0;
+//				//convert angle to a vector
+//				Flt xdir = cos(rad);
+//				Flt ydir = sin(rad);
+//				g.ship.vel[0] += xdir * (float)ydiff *
+//				    SHIFT_OVER;
+//				g.ship.vel[1] += ydir * (float)ydiff *
+//				    SHIFT_OVER;
+//				Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
+//					g.ship.vel[1]*g.ship.vel[1]);
+//				if (speed > SHIP_SPEED) {
+//					speed = SHIP_SPEED;
+//					normalize2d(g.ship.vel);
+//					g.ship.vel[0] *= speed;
+//					g.ship.vel[1] *= speed;
+//				}
+//				g.mouseThrustOn = true;
+//				clock_gettime(CLOCK_REALTIME,
+//					&g.mouseThrustTimer);
+//			}
 			x11.set_mouse_position(100, 100);
 			savex = savey = 100;
 		}
@@ -516,8 +522,10 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
 	ta->color[0] = a->color[0];
 	ta->color[1] = a->color[1];
 	ta->color[2] = a->color[2];
-	ta->vel[0] = a->vel[0] + (rnd()*2.0-1.0);
-	ta->vel[1] = a->vel[1] + (rnd()*2.0-1.0);
+//	ta->vel[0] = a->vel[0] + (rnd()*2.0-1.0);	
+//	ta->vel[1] = a->vel[1] + (rnd()*2.0-1.0);
+	ta->vel[0] = (rnd()*10.0-5);
+	ta->vel[1] = (rnd()*10.0-5);
 }
 
 void physics()
@@ -528,10 +536,10 @@ void physics()
 	g.ship.pos[1] += g.ship.vel[1];
 	//Check for collision with window edges
 	if (g.ship.pos[0] < 0.0) {
-		g.ship.pos[0] += (float)gl.xres;
+		g.ship.pos[0] = 0.0;
 	}
 	else if (g.ship.pos[0] > (float)gl.xres) {
-		g.ship.pos[0] -= (float)gl.xres;
+		g.ship.pos[0] = (float)gl.xres;
 	}
 	else if (g.ship.pos[1] < 0.0) {
 		g.ship.pos[1] += (float)gl.yres;
@@ -560,19 +568,19 @@ void physics()
 		b->pos[0] += b->vel[0];
 		b->pos[1] += b->vel[1];
 		//Check for collision with window edges
-		if (b->pos[0] < 0.0) {
-			
-            b->pos[0] += (float)gl.xres;
-		}
-		else if (b->pos[0] > (float)gl.xres) {
-			b->pos[0] -= (float)gl.xres;
-		}
-		else if (b->pos[1] < 0.0) {
-			b->pos[1] += (float)gl.yres;
-		}
-		else if (b->pos[1] > (float)gl.yres) {
-			b->pos[1] -= (float)gl.yres;
-		}
+//		if (b->pos[0] < 0.0) {
+//			
+//            b->pos[0] += (float)gl.xres;
+//		}
+//		else if (b->pos[0] > (float)gl.xres) {
+//			b->pos[0] -= (float)gl.xres;
+//		}
+//		else if (b->pos[1] < 0.0) {
+//			b->pos[1] += (float)gl.yres;
+//		}
+//		else if (b->pos[1] > (float)gl.yres) {
+//			b->pos[1] -= (float)gl.yres;
+//		}
 		i++;
 	}
 	//
@@ -580,14 +588,22 @@ void physics()
 	Asteroid *a = g.ahead;
 	//checks if asteroid has physics turn on or off
 	while (a && a->physics) {
+//	while (a) {
+	    	a->vel[1] += gravity;
+//		a->vel[0] = a->vel[0] * 0.8;
+		if (a->vel[1] < ASTEROID_VEL_MAX)
+		    a->vel[1] = ASTEROID_VEL_MAX;
 		a->pos[0] += a->vel[0];
 		a->pos[1] += a->vel[1];
 		//Check for collision with window edges
-		if (a->pos[0] < -100.0) {
-			a->pos[0] += (float)gl.xres+200;
-		}
-		else if (a->pos[0] > (float)gl.xres+100) {
-			a->pos[0] -= (float)gl.xres+200;
+//		if (a->pos[0] < -100.0) {
+//			a->pos[0] += (float)gl.xres+200;
+//		}
+//		else if (a->pos[0] > (float)gl.xres+100) {
+//			a->pos[0] -= (float)gl.xres+200;
+//		}
+		if (a->pos[0] < 0.0 || a->pos[0] > (float)gl.xres) {
+		    a->vel[0] = -(a->vel[0]);
 		}
 		else if (a->pos[1] < -100.0) {
 			a->pos[1] += (float)gl.yres+200;
@@ -598,7 +614,7 @@ void physics()
 		a->angle += a->rotate;
 		a = a->next;
 	}
-	
+
 	//
 	//Asteroid collision with bullets?
 	//If collision detected:
@@ -707,33 +723,35 @@ void physics()
 	//---------------------------------------------------
 	//check keys pressed now
 	if (gl.keys[XK_Left]) {
-		g.ship.angle += 4.0;
-		if (g.ship.angle >= 360.0f)
-			g.ship.angle -= 360.0f;
+//		g.ship.angle += 4.0;
+//		if (g.ship.angle >= 360.0f)
+//			g.ship.angle -= 360.0f;
+		g.ship.pos[0] -= SHIPSPEED;
 	}
 	if (gl.keys[XK_Right]) {
-		g.ship.angle -= 4.0;
-		if (g.ship.angle < 0.0f)
-			g.ship.angle += 360.0f;
+//		g.ship.angle -= 4.0;
+//		if (g.ship.angle < 0.0f)
+//			g.ship.angle += 360.0f;
+		g.ship.pos[0] += SHIPSPEED;
 	}
-	if (gl.keys[XK_Up]) {
-		//apply thrust
-		//convert ship angle to radians
-		Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
-		//convert angle to a vector
-		Flt xdir = cos(rad);
-		Flt ydir = sin(rad);
-		g.ship.vel[0] += xdir*0.02f;
-		g.ship.vel[1] += ydir*0.02f;
-		Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
-				g.ship.vel[1]*g.ship.vel[1]);
-		if (speed > 10.0f) {
-			speed = 10.0f;
-			normalize2d(g.ship.vel);
-			g.ship.vel[0] *= speed;
-			g.ship.vel[1] *= speed;
-		}
-	}
+//	if (gl.keys[XK_Up]) {
+//		//apply thrust
+//		//convert ship angle to radians
+//		Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+//		//convert angle to a vector
+//		Flt xdir = cos(rad);
+//		Flt ydir = sin(rad);
+//		g.ship.vel[0] += xdir*0.02f;
+//		g.ship.vel[1] += ydir*0.02f;
+//		Flt speed = sqrt(g.ship.vel[0]*g.ship.vel[0]+
+//				g.ship.vel[1]*g.ship.vel[1]);
+//		if (speed > 10.0f) {
+//			speed = 10.0f;
+//			normalize2d(g.ship.vel);
+//			g.ship.vel[0] *= speed;
+//			g.ship.vel[1] *= speed;
+//		}
+//	}
 	if (gl.keys[XK_space]) {
 		//a little time between each bullet
 		struct timespec bt;
