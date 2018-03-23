@@ -37,7 +37,9 @@ const float SHIPSPEED = 10;
 #define SUPER 100000
 const int MAX_BULLETS = 1111;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
-
+int GODMODE = 1;
+int DEAD = 0;
+int MAX_ASTEROIDS = 3;
 //-----------------------------------------------------------------------------
 //Setup timers
 const double oobillion = 1.0 / 1e9;
@@ -102,7 +104,7 @@ public:
 		asterdestroyed = 0;
 		mouseThrustOn = false;
 		//build 10 asteroids...
-		for (int j=0; j<10; j++) {
+		for (int j=0; j<MAX_ASTEROIDS; j++) {
 			Asteroid *a = new Asteroid;
 			a->nverts = 8;
 			a->radius = rnd()*80.0 + 40.0;
@@ -330,14 +332,14 @@ void check_mouse(XEvent *e)
 	static int savex = 0;
 	static int savey = 0;
 	static int ct=0;
-	const float COMPLETE_ANGLE = 360.0f;
-	const float MIN_ANGLE = 0.0f;
-	const float SHIP_SPEED = 15.0f;
-	const float SHIFT_OVER = 0.001f;
+//	const float COMPLETE_ANGLE = 360.0f;
+//	const float MIN_ANGLE = 0.0f;
+//	const float SHIP_SPEED = 15.0f;
+//	const float SHIFT_OVER = 0.001f;
 	const float BULLET_COLOR = 1.0f;
-	const float SHIFT_POS = 20.0f;
-	const float SHIFT_VEL = 6.0f;
-	const float SHIFT_ANGLE = 90.0;
+//	const float SHIFT_POS = 20.0f;
+//	const float SHIFT_VEL = 6.0f;
+//	const float SHIFT_ANGLE = 90.0;
 	if (e->type != ButtonPress &&
 			e->type != ButtonRelease &&
 			e->type != MotionNotify)
@@ -388,7 +390,7 @@ void check_mouse(XEvent *e)
 		if (savex != e->xbutton.x || savey != e->xbutton.y) {
 			//Mouse moved
 			int xdiff = savex - e->xbutton.x;
-			int ydiff = savey - e->xbutton.y;
+//			int ydiff = savey - e->xbutton.y;
 			if (++ct < 10)
 				return;		
 //			if (xdiff > 0) {
@@ -530,6 +532,42 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
 
 void physics()
 {
+    if (g.nasteroids < MAX_ASTEROIDS){
+
+			Asteroid *a = new Asteroid;
+			a->nverts = 8;
+			a->radius = rnd()*80.0 + 40.0;
+			Flt r2 = a->radius / 2.0;
+			Flt angle = 0.0f;
+			Flt inc = (PI * 2.0) / (Flt)a->nverts;
+			for (int i=0; i<a->nverts; i++) {
+				a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
+				a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
+				angle += inc;
+			}
+			a->pos[0] = (Flt)(rand() % gl.xres);
+			a->pos[1] = (Flt)(rand() % gl.yres);
+			a->pos[2] = 0.0f;
+			a->angle = 0.0;
+			a->rotate = rnd() * 4.0 - 2.0;
+			a->color[0] = rnd();
+			a->color[1] = rnd();
+			a->color[2] = rnd();
+//			a->vel[0] = (Flt)(rnd()*2.0-1.0);
+//			a->vel[1] = (Flt)(rnd()*2.0-1.0);
+			a->vel[0] = 0;
+			a->vel[0] = 0;
+			//std::cout << "asteroid" << std::endl;
+			//add to front of linked list
+			a->next = g.ahead;
+			if (g.ahead != NULL) {
+				g.ahead->prev = a;
+			}
+			g.ahead = a;
+			++g.nasteroids;
+    }
+
+
 	Flt d0,d1,dist;
 	//Update ship position
 	g.ship.pos[0] += g.ship.vel[0];
@@ -587,8 +625,8 @@ void physics()
 	//Update asteroid positions
 	Asteroid *a = g.ahead;
 	//checks if asteroid has physics turn on or off
-	while (a && a->physics) {
-//	while (a) {
+//	while (a && a->physics) {
+	while (a) {
 	    	a->vel[1] += gravity;
 //		a->vel[0] = a->vel[0] * 0.8;
 		if (a->vel[1] < ASTEROID_VEL_MAX)
@@ -623,6 +661,12 @@ void physics()
 	//      if asteroid small, delete it
 	a = g.ahead;
 	while (a) {
+		d0 = g.ship.pos[0] - a->pos[0];
+		d1 = g.ship.pos[1] - a->pos[1];
+		dist = (d0*d0 + d1*d1);
+		if (dist < a->radius*a->radius && !GODMODE) {
+		    DEAD = 1;
+		}
 		//is there a bullet within its radius?
 		int i=0;
 		while (i < g.nbullets) {
@@ -634,7 +678,7 @@ void physics()
 				//cout << "asteroid hit." << endl;
 				//this asteroid is hit.
 				if (a->radius > MINIMUM_ASTEROID_SIZE) {
-					//break it into pieces.
+				//break it into pieces.
 					Asteroid *ta = a;
 					buildAsteroidFragment(ta, a);
 					int r = rand()%10+5;
@@ -646,8 +690,9 @@ void physics()
 						//add to front of asteroid
 						//linked list
 						ta->next = g.ahead;
-						if (g.ahead != NULL)
+						if (g.ahead != NULL) {
 							g.ahead->prev = ta;
+						}
 						g.ahead = ta;
 						g.nasteroids++;
 					}
@@ -669,8 +714,9 @@ void physics()
 						sizeof(Bullet));
 					g.nbullets--;
 				}
-				if (a == NULL)
+				if (a == NULL) {
 					break;
+				}
 			}
 			if (((dist - SUPER < (a->radius*a->radius)) || (dist + SUPER < (a->radius*a->radius)) || (dist < (a->radius*a->radius))) && b->super) {
 				//cout << "asteroid hit." << endl;
@@ -688,8 +734,9 @@ void physics()
 						//add to front of asteroid
 						//linked list
 						ta->next = g.ahead;
-						if (g.ahead != NULL)
+						if (g.ahead != NULL){
 							g.ahead->prev = ta;
+						}
 						g.ahead = ta;
 						g.nasteroids++;
 					}
@@ -716,9 +763,22 @@ void physics()
 			}
 			i++;
 		}
-		if (a == NULL)
+//		d0 = g.ship.pos[0] - a->pos[0];
+//		d1 = g.ship.pos[1] - a->pos[1];
+//		dist = (d0*d0 + d1*d1);
+//		if (dist < a->radius*a->radius && !GODMODE) {
+//		    DEAD = 1;
+//		}
+		if (a == NULL){
 			break;
+		}
 		a = a->next;
+//		d0 = g.ship.pos[0] - a->pos[0];
+//		d1 = g.ship.pos[1] - a->pos[1];
+//		dist = (d0*d0 + d1*d1);
+//		if (dist < a->radius*a->radius && !GODMODE) {
+//		    DEAD = 1;
+//		}
 	}
 	//---------------------------------------------------
 	//check keys pressed now
@@ -866,6 +926,8 @@ void render()
 	//
 	//-------------
 	//Draw the ship
+	if (!DEAD) {
+
 	glColor3fv(g.ship.color);
 	glPushMatrix();
 	glTranslatef(g.ship.pos[0], g.ship.pos[1], g.ship.pos[2]);
@@ -903,6 +965,8 @@ void render()
 				glVertex2f(g.ship.pos[0]+xe,g.ship.pos[1]+ye);
 			}
 		glEnd();
+	}
+
 	}
 	//------------------
 	//Draw the asteroids
