@@ -28,6 +28,11 @@ using namespace std;
 #include "Bullet.h"
 
 //constants
+const int MENU = 0;
+const int GAME = 1;
+//const int
+int program_state = GAME;
+
 const float timeslice = 1.0f;
 const float gravity = -0.2f;
 const float ASTEROID_VEL_MAX = -10.0;
@@ -261,9 +266,14 @@ public:
 //function prototypes
 void init_opengl(void);
 void check_mouse(XEvent *e);
+void game_check_mouse(XEvent *e);
+extern void jt_menu_check_mouse(XEvent *e);
 int check_keys(XEvent *e);
 void physics();
+void game_physics();
+extern void jt_menu_physics( void );
 void render();
+extern void jt_menu_render( void );
 
 //==========================================================================
 // M A I N
@@ -326,7 +336,22 @@ void normalize2d(Vec v)
 	v[1] *= len;
 }
 
-void check_mouse(XEvent *e)
+void check_mouse(XEvent *e) {
+    switch (program_state){
+	case GAME:
+		game_check_mouse(e);
+		break;
+
+	case MENU:
+		jt_menu_check_mouse(e);
+		break;
+    }
+}
+
+
+
+
+void game_check_mouse(XEvent *e)
 {
 	//Was a mouse button clicked?
 	static int savex = 0;
@@ -531,6 +556,17 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
 }
 
 void physics()
+{
+	switch (program_state) {
+		case GAME:
+			game_physics();
+		case MENU:
+			jt_menu_physics();
+	}
+}
+
+
+void game_physics()
 {
     if (g.nasteroids < MAX_ASTEROIDS){
 

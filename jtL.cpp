@@ -25,6 +25,12 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 
 const uint64_t MAX  = 1 << 16 ;  
 
+
+void jt_menu_physics( void ) { return; }
+void jt_menu_render( void ) { return; }
+void jt_menu_check_mouse( XEvent *e ) { return ; }
+
+
 int jtL_Lab7()
 { 
     void use_cout( const uint64_t ) ; 
