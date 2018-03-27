@@ -273,6 +273,7 @@ void physics();
 void game_physics();
 extern void jt_menu_physics( void );
 void render();
+void game_render();
 extern void jt_menu_render( void );
 
 //==========================================================================
@@ -944,7 +945,21 @@ void game_physics()
 	}
 }
 
+
 void render()
+{
+	switch (program_state) {
+		case GAME:
+			game_render();
+			break;
+		case MENU:
+			jt_menu_render();
+			break;
+	}	
+}
+			
+
+void game_render()
 {
 
 	Rect r;
