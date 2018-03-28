@@ -39,7 +39,8 @@ const float ASTEROID_VEL_MAX = -10.0;
 const float SHIPSPEED = 10;
 #define PI 3.141592653589793
 #define ALPHA 1
-#define SUPER 100000
+const int SUPER = 100000;
+const int SUPERSIZE = (sqrt(SUPER)/2 +20);
 const int MAX_BULLETS = 1111;
 const int BULLETSPEED = 40;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
@@ -749,7 +750,7 @@ void game_physics()
 						g.ahead = ta;
 						g.nasteroids++;
 					}
-		//				g.asterdestroyed++;
+						g.asterdestroyed++;
 				} else {
 					a->color[0] = 1.0;
 					a->color[1] = 0.1;
@@ -849,6 +850,19 @@ void game_physics()
 //			g.ship.angle += 360.0f;
 		g.ship.pos[0] += SHIPSPEED;
 	}
+	//check ship window edge
+	if (g.ship.pos[0] < 0.0) {
+		g.ship.pos[0] = 0.0;
+	}
+	else if (g.ship.pos[0] > (float)gl.xres) {
+		g.ship.pos[0] = (float)gl.xres;
+	}
+	else if (g.ship.pos[1] < 0.0) {
+		g.ship.pos[1] += (float)gl.yres;
+	}
+	else if (g.ship.pos[1] > (float)gl.yres) {
+		g.ship.pos[1] -= (float)gl.yres;
+	}
 //	if (gl.keys[XK_Up]) {
 //		//apply thrust
 //		//convert ship angle to radians
@@ -928,7 +942,7 @@ void game_physics()
 				Bullet *b = &g.barr[g.nbullets];
 				timeCopy(&b->time, &bt);
 				b->pos[0] = g.ship.pos[0];
-				b->pos[1] = g.ship.pos[1];
+				b->pos[1] = g.ship.pos[1] + SUPERSIZE;
 				b->vel[0] = g.ship.vel[0];
 				b->vel[1] = g.ship.vel[1];
 				//convert ship angle to radians
@@ -1068,21 +1082,38 @@ void game_render()
 	Bullet *b = &g.barr[0];
 	for (int i=0; i<g.nbullets; i++) {
 		//Log("draw bullet...\n");
-		glColor3f(1.0, 1.0, 1.0);
-		glBegin(GL_POINTS);
-			glVertex2f(b->pos[0],      b->pos[1]);
-			glVertex2f(b->pos[0]-1.0f, b->pos[1]);
-			glVertex2f(b->pos[0]+1.0f, b->pos[1]);
-			glVertex2f(b->pos[0],      b->pos[1]-1.0f);
-			glVertex2f(b->pos[0],      b->pos[1]+1.0f);
-			glColor3f(0.8, 0.8, 0.8);
-			glVertex2f(b->pos[0]-1.0f, b->pos[1]-1.0f);
-			glVertex2f(b->pos[0]-1.0f, b->pos[1]+1.0f);
-			glVertex2f(b->pos[0]+1.0f, b->pos[1]-1.0f);
-			glVertex2f(b->pos[0]+1.0f, b->pos[1]+1.0f);
+		if (!b->super){
+	 		glColor3f(1.0, 1.0, 1.0);
+			glBegin(GL_POINTS);
+				glVertex2f(b->pos[0],      b->pos[1]);
+				glVertex2f(b->pos[0]-1.0f, b->pos[1]);
+				glVertex2f(b->pos[0]+1.0f, b->pos[1]);
+				glVertex2f(b->pos[0],      b->pos[1]-1.0f);
+				glVertex2f(b->pos[0],      b->pos[1]+1.0f);
+				glColor3f(0.8, 0.8, 0.8);
+				glVertex2f(b->pos[0]-1.0f, b->pos[1]-1.0f);
+				glVertex2f(b->pos[0]-1.0f, b->pos[1]+1.0f);
+				glVertex2f(b->pos[0]+1.0f, b->pos[1]-1.0f);
+				glVertex2f(b->pos[0]+1.0f, b->pos[1]+1.0f);
+			glEnd();
+			++b;
+		} else {
+		float x, y;
+		glColor3f(255.0/255.0, 165.0/255.0, 0.0/255.0);
+		glBegin(GL_TRIANGLE_FAN);
+		for (int i=0; i<180; i++){
+			x = SUPERSIZE * cos(i) + b->pos[0];
+			y = SUPERSIZE * sin(i) + b->pos[1];
+			glVertex3f (x, y, 0);
+
+			x = SUPERSIZE * cos (i+0.1) + b->pos[0];
+			y = SUPERSIZE * sin (i+0.1) + b->pos[1];
+			glVertex3f (x, y, 0);
+			}
 		glEnd();
 		++b;
-	}
+		}
+	}		
 }
 
 
