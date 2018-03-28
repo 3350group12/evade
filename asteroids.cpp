@@ -41,6 +41,7 @@ const float SHIPSPEED = 10;
 #define ALPHA 1
 #define SUPER 100000
 const int MAX_BULLETS = 1111;
+const int BULLETSPEED = 40;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
 int GODMODE = 1;
 int DEAD = 0;
@@ -52,9 +53,6 @@ extern struct timespec timeStart, timeCurrent;
 extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
-
-extern void nick_Lab7();
-extern int jtL_Lab7() ;
 
 class Global {
 public:
@@ -264,6 +262,8 @@ public:
 } x11;
 
 //function prototypes
+extern void nick_Lab7();
+extern int jtL_Lab7() ;
 void init_opengl(void);
 void check_mouse(XEvent *e);
 void game_check_mouse(XEvent *e);
@@ -275,6 +275,8 @@ extern void jt_menu_physics( void );
 void render();
 void game_render();
 extern void jt_menu_render( void );
+
+extern int nick_dead(int, int, Asteroid*);
 
 //==========================================================================
 // M A I N
@@ -389,7 +391,7 @@ void game_check_mouse(XEvent *e)
 					b->pos[1] = g.ship.pos[1];
 					b->vel[0] = g.ship.vel[0];
 					b->vel[1] = g.ship.vel[1];
-					b->vel[1] = 20;
+					b->vel[1] = BULLETSPEED;
 					//convert ship angle to radians
 //					Flt rad = ((g.ship.angle+SHIFT_ANGLE) /
 //						COMPLETE_ANGLE) * PI * 2.0;
@@ -698,12 +700,16 @@ void game_physics()
 	//      if asteroid small, delete it
 	a = g.ahead;
 	while (a) {
-		d0 = g.ship.pos[0] - a->pos[0];
-		d1 = g.ship.pos[1] - a->pos[1];
-		dist = (d0*d0 + d1*d1);
-		if (dist < a->radius*a->radius && !GODMODE) {
-		    DEAD = 1;
+		if (nick_dead(g.ship.pos[0], g.ship.pos[1], a) && !GODMODE) {
+			DEAD = 1;
 		}
+//		cout << DEAD << endl;
+//		d0 = g.ship.pos[0] - a->pos[0];
+//		d1 = g.ship.pos[1] - a->pos[1];
+//		dist = (d0*d0 + d1*d1);
+//		if (dist < a->radius*a->radius && !GODMODE) {
+//		    DEAD = 1;
+//		}
 		//is there a bullet within its radius?
 		int i=0;
 		while (i < g.nbullets) {

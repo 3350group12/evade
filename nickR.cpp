@@ -79,3 +79,14 @@ void nick_divide_opt()
     ggprint8b(&r, 16, 0x0088bbff, "timer_opt: %lf", diff);
 }
 
+int nick_dead(int shipXpos, int shipYpos, Asteroid* a)
+{
+	Flt d0, d1, dist;
+	d0 = shipXpos - a->pos[0];
+	d1 = shipYpos - a->pos[1];
+	dist = (d0*d0 + d1*d1);
+	if (dist < a->radius*a->radius) {
+		return 1;
+	}
+	return 0;
+}
