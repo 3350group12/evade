@@ -572,7 +572,6 @@ void physics()
 void game_physics()
 {
     if (g.nasteroids < MAX_ASTEROIDS){
-
 			Asteroid *a = new Asteroid;
 			a->nverts = 8;
 			a->radius = rnd()*80.0 + 40.0;
@@ -585,7 +584,8 @@ void game_physics()
 				angle += inc;
 			}
 			a->pos[0] = (Flt)(rand() % gl.xres);
-			a->pos[1] = (Flt)(rand() % gl.yres);
+//			a->pos[1] = (Flt)(rand() % gl.yres);
+			a->pos[1] = (Flt)(gl.yres + 100);
 			a->pos[2] = 0.0f;
 			a->angle = 0.0;
 			a->rotate = rnd() * 4.0 - 2.0;
@@ -684,10 +684,21 @@ void game_physics()
 		}
 		else if (a->pos[1] < -100.0) {
 			a->pos[1] += (float)gl.yres+200;
-		}
-		else if (a->pos[1] > (float)gl.yres+100) {
-			a->pos[1] -= (float)gl.yres+200;
-		}
+					Asteroid *savea = a->next;
+					deleteAsteroid(&g, a);
+					g.asterdestroyed++;
+					if(g.ahead == NULL) {
+					a = savea;
+} else { 
+					a = g.ahead;
+
+}
+					g.nasteroids--;
+//cout << "Asteroid count: " << g.nasteroids << endl;
+}
+//		else if (a->pos[1] > (float)gl.yres+100) {
+//			a->pos[1] -= (float)gl.yres+200;
+//		}
 		a->angle += a->rotate;
 		a = a->next;
 	}
