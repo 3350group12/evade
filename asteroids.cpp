@@ -120,7 +120,8 @@ public:
 				angle += inc;
 			}
 			a->pos[0] = (Flt)(rand() % gl.xres);
-			a->pos[1] = (Flt)(rand() % gl.yres);
+//			a->pos[1] = (Flt)(rand() % gl.yres);
+			a->pos[1] = (Flt)(gl.yres + 100);
 			a->pos[2] = 0.0f;
 			a->angle = 0.0;
 			a->rotate = rnd() * 4.0 - 2.0;
@@ -686,16 +687,14 @@ void game_physics()
 			a->pos[1] += (float)gl.yres+200;
 					Asteroid *savea = a->next;
 					deleteAsteroid(&g, a);
-					g.asterdestroyed++;
 					if(g.ahead == NULL) {
-					a = savea;
-} else { 
-					a = g.ahead;
+						a = savea;
+					} else { 
+						a = g.ahead;
 
-}
+					}			
 					g.nasteroids--;
-//cout << "Asteroid count: " << g.nasteroids << endl;
-}
+		}
 //		else if (a->pos[1] > (float)gl.yres+100) {
 //			a->pos[1] -= (float)gl.yres+200;
 //		}
@@ -750,6 +749,7 @@ void game_physics()
 						g.ahead = ta;
 						g.nasteroids++;
 					}
+		//				g.asterdestroyed++;
 				} else {
 					a->color[0] = 1.0;
 					a->color[1] = 0.1;
@@ -793,6 +793,7 @@ void game_physics()
 						}
 						g.ahead = ta;
 						g.nasteroids++;
+						g.asterdestroyed++;
 					}
 				} else {
 					a->color[0] = 1.0;
@@ -895,6 +896,7 @@ void game_physics()
 				b->color[0] = 1.0f;
 				b->color[1] = 1.0f;
 				b->color[2] = 1.0f;
+				b->super = false;
 				g.nbullets++;
 			}
 		}
