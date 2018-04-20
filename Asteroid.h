@@ -2,6 +2,7 @@
 #define Asteroid_h
 
 #include <cstdlib>
+#include <ctime>
 
 //defined types 
 typedef float Flt; 
@@ -27,6 +28,7 @@ public:
         Flt radius;
         Vec vert[8];
         float angle;
+		int classification;
         float rotate;
         float color[3];
         struct Asteroid *prev;
@@ -37,6 +39,8 @@ public:
                 physics = false;
                 prev = NULL;
                 next = NULL;
+				srand((int)time(0));
+				classification = rand() % 100;
         }
 };
 

@@ -26,6 +26,7 @@ using namespace std;
 #include "fonts.h"
 #include "Asteroid.h"
 #include "Bullet.h"
+#include "as_PowerUp.h"
 
 //constants
 const int MENU = 0;
@@ -42,6 +43,7 @@ const float SHIPSPEED = 10;
 const int SUPER = 100000;
 const int SUPERSIZE = (sqrt(SUPER)/2 +20);
 const int MAX_BULLETS = 1111;
+const int MAX_POWERUPS = 4;
 const int BULLETSPEED = 40;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
 int GODMODE = 1;
@@ -93,6 +95,7 @@ public:
 	Ship ship;
 	Asteroid *ahead;
 	Bullet *barr;
+	as_PowerUp *powerUps;
 	int nasteroids;
 	int nbullets;
 	int asterdestroyed;
@@ -103,6 +106,7 @@ public:
 	Game() {
 		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
+		powerUps = new as_PowerUp[MAX_POWERUPS];
 		nasteroids = 0;
 		nbullets = 0;
 		asterdestroyed = 0;
