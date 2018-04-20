@@ -39,7 +39,6 @@ public:
                 physics = false;
                 prev = NULL;
                 next = NULL;
-				srand((int)time(0));
 				sequence = rand() % 100;
         }
 };

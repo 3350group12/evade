@@ -14,8 +14,10 @@ class as_PowerUp {
 public: 
 	powerUp_t powerUp;
 	char* powerUP;
-	int amount;
+	int stock;
 	as_PowerUp();
+	void generatePowerUp();
+	void updatePowerUp();
 	int color[3];
 
 

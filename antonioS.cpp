@@ -118,7 +118,12 @@ void superifyBullet(Bullet *b)
 
 as_PowerUp::as_PowerUp()
 {
-	srand((int)time(0));
+	stock = 0;
+
+}
+
+void as_PowerUp::generatePowerUp()
+{
 	int temp = rand() % 4;
 	switch (temp) {
 		case 0:
@@ -149,9 +154,12 @@ as_PowerUp::as_PowerUp()
 			break;
 	}
 
+	printf("PowerUp generated!");
+
 }
 
 void generatePowerUp() {
 	//code to generate powerUP based on Asteroid classification number
+
 
 }
