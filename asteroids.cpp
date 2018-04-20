@@ -26,7 +26,7 @@ using namespace std;
 #include "fonts.h"
 #include "Asteroid.h"
 #include "Bullet.h"
-#include "as_PowerUp.h"
+#include "antonioS.h"
 
 //constants
 const int MENU = 0;

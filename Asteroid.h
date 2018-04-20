@@ -28,7 +28,7 @@ public:
         Flt radius;
         Vec vert[8];
         float angle;
-		int classification;
+		int sequence;
         float rotate;
         float color[3];
         struct Asteroid *prev;
@@ -40,7 +40,7 @@ public:
                 prev = NULL;
                 next = NULL;
 				srand((int)time(0));
-				classification = rand() % 100;
+				sequence = rand() % 100;
         }
 };
 
