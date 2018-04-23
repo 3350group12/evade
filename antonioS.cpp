@@ -131,6 +131,7 @@ void as_PowerUp::generatePowerUp()
 			color[0] = 255;
 			color[1] = 165;
 			color[2] = 0;
+			stock = rand() % 10 + 1;
 			break;
 		case 1:
 			powerUp = GodMode;
@@ -143,12 +144,14 @@ void as_PowerUp::generatePowerUp()
 			color[0] = 127;
 			color[1] = 255;
 			color[2] = 0;
+			stock = 1;
 			break;
 		case 3:
 			powerUp = Clear;
 			color[0] = 0;
 			color[1] = 0;
 			color[2] = 0;
+			stock = 1;
 			break;
 		default:
 			break;
@@ -158,8 +161,34 @@ void as_PowerUp::generatePowerUp()
 
 }
 
-void generatePowerUp() {
+void classifyAsteroid(Asteroid *a, as_PowerUp *powerUps) {
 	//code to generate powerUP based on Asteroid classification number
+
+	if (a->sequence < 10) {
+		as_PowerUp temp;
+		temp.generatePowerUp();
+		switch(temp.powerUp) {
+			case SuperBullet:
+				printf("Asteroid classified as SuperBullet Powerup!\n");
+				powerUps[0].stock += temp.stock;
+				break;
+			case GodMode:
+				printf("Asteroid classified as GodMode Powerup!\n");
+				powerUps[1].stock += temp.stock;
+				break;
+			case ExtraLife:
+				printf("Asteroid classified as ExtraLife Powerup!\n");
+				powerUps[2].stock += temp.stock;
+				break;
+			case Clear:
+				printf("Asteroid classified as CLearPowerup!\n");
+				powerUps[3].stock += temp.stock;
+				break;
+				
+		
+		}
+	}
+
 
 
 }

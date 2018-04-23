@@ -6,7 +6,7 @@ enum powerUp_t {
 	GodMode,
 	ExtraLife,
 	Clear,
-	Liberate,
+	//Liberate,
 	END = Clear,
 };
 
