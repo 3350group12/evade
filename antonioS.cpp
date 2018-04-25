@@ -167,6 +167,7 @@ void classifyAsteroid(Asteroid *a, as_PowerUp *powerUps) {
 	if (a->sequence < 10) {
 		as_PowerUp temp;
 		temp.generatePowerUp();
+		int before = 0;
 		switch(temp.powerUp) {
 			case SuperBullet:
 				printf("Asteroid classified as SuperBullet Powerup!\n");

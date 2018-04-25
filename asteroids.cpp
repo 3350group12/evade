@@ -41,7 +41,7 @@ const float SHIPSPEED = 10;
 #define PI 3.141592653589793
 #define ALPHA 1
 const int SUPER = 100000;
-const int SUPERSIZE = (sqrt(SUPER)/2 +20);
+const int SUPERSIZE = (sqrt(SUPER)/20 +20);
 const int MAX_BULLETS = 1111;
 const int MAX_POWERUPS = 4;
 const int BULLETSPEED = 40;
@@ -977,6 +977,7 @@ void game_physics()
 				}	
 			}
 			g.powerUps[0].stock--;
+			printf("\nSuperBullets left: %d\n", g.powerUps[0].stock);
 		}
 	}
 	if (g.mouseThrustOn) {
