@@ -115,6 +115,7 @@ public:
 		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
 		powerUps = new as_PowerUp[MAX_POWERUPS];
+        powerUps[2].stock = 3;
 		nasteroids = 0;
 		nbullets = 0;
 		asterdestroyed = 0;
@@ -789,6 +790,7 @@ void game_physics()
 			if (((dist - SUPER < (a->radius*a->radius)) || (dist + SUPER < (a->radius*a->radius)) || (dist < (a->radius*a->radius))) && b->super) {
 				//cout << "asteroid hit." << endl;
 				//this asteroid is hit.
+				classifyAsteroid(a, g.powerUps);
 				if (a->radius > MINIMUM_ASTEROID_SIZE) {
 					//break it into pieces.
 					Asteroid *ta = a;
@@ -974,10 +976,10 @@ void game_physics()
 					b->color[2] = 1.0f;
 					b->super = true;
 					g.nbullets++;
-				}	
+					g.powerUps[0].stock--;
+					printf("\nSuperBullets left: %d\n", g.powerUps[0].stock);}	
 			}
-			g.powerUps[0].stock--;
-			printf("\nSuperBullets left: %d\n", g.powerUps[0].stock);
+		
 		}
 	}
 	if (g.mouseThrustOn) {
@@ -1018,6 +1020,20 @@ void game_render()
 	ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
 	ggprint8b(&r, 16, 0x00ffff00, "n asteroids destroyed: %i",
 		g.asterdestroyed);
+    if (g.powerUps[0].stock) {
+	    ggprint8b(&r, 16, 0x00ffff00, "SuperBullets: %i", g.powerUps[0].stock);
+    }
+    if (g.powerUps[1].stock) {
+	    ggprint8b(&r, 16, 0x00ffff00, "GodMode available");
+    }
+    if (g.powerUps[2].stock) {
+	    ggprint8b(&r, 16, 0x00ffff00, "Lives available: %i", 
+            g.powerUps[2].stock);
+    }
+    if (g.powerUps[3].stock) {
+	    ggprint8b(&r, 16, 0x00ffff00, "Clears available: %i", 
+            g.powerUps[3].stock);
+    }
 	
 	//
 	//-------------
