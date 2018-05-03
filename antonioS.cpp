@@ -9,15 +9,10 @@
 //defined types 
 #define PI 3.141592653589793
 
-
 using namespace std;
 
 extern struct timespec timeStart, timeCurrent;
 extern double timeDiff(struct timespec *start, struct timespec *end);
-
-
-
-
 
 //turn physics for asteroids on and off
 void showName(Rect r, int y_res)
@@ -25,7 +20,6 @@ void showName(Rect r, int y_res)
 	ggprint8b(&r, 16, 0x00ff0000, "Antonio Solorio");
 
 }
-
 
 void johnDoe(Rect r, int y_res) 
 {
@@ -54,7 +48,6 @@ void johnDoe(Rect r, int y_res)
     ggprint8b(&r, 16, 0x00ff0000, "function bit shift optimized time: %lf"
 		, seconds2);
 }
-
 
 void drawBox(int x, int y, Rect z)
 {
@@ -126,62 +119,47 @@ void as_PowerUp::generatePowerUp()
 {
 	int temp = rand() % 100;
 	if (temp < 90) {
-		temp = 0;
+		powerUp = SuperBullet;
+	    color[0] = 255;
+		color[1] = 165;
+		color[2] = 0;
+		stock = 1;
 	} 
     else if (temp >= 90 || temp < 96) {
-        temp = 1;
+		powerUp = GodMode;
+		color[0] = 0;
+		color[1] = 191;
+		color[2] = 255;
+        stock = 1;
     }
     else if (temp >= 96 || temp < 98) {
         temp = 2;
+		powerUp = ExtraLife;
+		color[0] = 127;
+		color[1] = 255;
+		color[2] = 0;
+		stock = 1;
     }
     else {
-        temp = 3;
+		powerUp = Clear;
+		color[0] = 0;
+		color[1] = 0;
+		color[2] = 0;
+		stock = 1;
     }
     
-	switch (temp) {
-		case 0:
-			powerUp = SuperBullet;
-			color[0] = 255;
-			color[1] = 165;
-			color[2] = 0;
-			stock = 1;
-			break;
-		case 1:
-			powerUp = GodMode;
-			color[0] = 0;
-			color[1] = 191;
-			color[2] = 255;
-            stock = 1;
-			break;
-		case 2:
-			powerUp = ExtraLife;
-			color[0] = 127;
-			color[1] = 255;
-			color[2] = 0;
-			stock = 1;
-			break;
-		case 3:
-			powerUp = Clear;
-			color[0] = 0;
-			color[1] = 0;
-			color[2] = 0;
-			stock = 1;
-			break;
-		default:
-			break;
-	}
-
 	printf("PowerUp generated!");
 
 }
 
-void classifyAsteroid(Asteroid *a, as_PowerUp *powerUps) {
-	//code to generate powerUP based on Asteroid classification number
+
+void classifyAsteroid(Asteroid *a, as_PowerUp *powerUps) 
+{
+	//generates powerUP based on Asteroid classification number
 
 	if (a->sequence < 5) {
 		as_PowerUp temp;
 		temp.generatePowerUp();
-		int before = 0;
 		switch(temp.powerUp) {
 			case SuperBullet:
 				printf("Asteroid classified as SuperBullet Powerup!\n");
@@ -207,7 +185,18 @@ void classifyAsteroid(Asteroid *a, as_PowerUp *powerUps) {
 	}
 }
 
-void destroyShip() {
+void destroyShip() 
+{
+
+
+
+}
+
+void colorPowerUps (Asteroid *a) 
+{
+
+
+
 
 
 

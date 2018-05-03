@@ -142,6 +142,7 @@ public:
 			a->color[0] = rnd();
 			a->color[1] = rnd();
 			a->color[2] = rnd();
+            
 //			a->vel[0] = (Flt)(rnd()*2.0-1.0);
 //			a->vel[1] = (Flt)(rnd()*2.0-1.0);
 			a->vel[0] = 0;
@@ -931,19 +932,27 @@ void game_physics()
 		}
 	}
 	if (gl.keys[XK_b]) {
+        if (g.powerUps[3].stock) {
 	    	a = g.ahead;
-		while(a) {
+		    while (a) {
+		        Asteroid *savea = a->next;
+		        deleteAsteroid(&g, a);
+		        g.asterdestroyed++;
+		        a = savea;
+		        g.nasteroids--;
+                g.powerUps[3].stock--;
 
-		    Asteroid *savea = a->next;
-		    deleteAsteroid(&g, a);
-		    g.asterdestroyed++;
-		    a = savea;
-		    g.nasteroids--;
+		    } 
+        }  
+    }
+
+    if (gl.keys[XK_n]) {
+
+        //Activate GodMode goes here
 
 
-		}
 
-	}
+    }
 	if (gl.keys[XK_v]) {
 		if(g.powerUps[0].stock > 0) {
 			//a little time between each bullet
@@ -977,7 +986,7 @@ void game_physics()
 					b->super = true;
 					g.nbullets++;
 					g.powerUps[0].stock--;
-					printf("\nSuperBullets left: %d\n", g.powerUps[0].stock);}	
+                }	
 			}
 		
 		}
