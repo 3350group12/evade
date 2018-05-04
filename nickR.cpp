@@ -44,7 +44,7 @@ void nick_divide()
     long int a = 1125899906842624;
     int b = 2;
     for (int i=0; i<50; i++) {
-	a = a/b;
+		a = a/b;
     }
 
     //get and print time
@@ -66,7 +66,7 @@ void nick_divide_opt()
     
     long int a = 1125899906842624;
     for (int i=0; i<50; i++) {
-	a >>= 1;
+		a >>= 1;
     }
 
     //get and print time
@@ -90,3 +90,26 @@ int nick_dead(int shipXpos, int shipYpos, Asteroid* a)
 	}
 	return 0;
 }
+
+void nick_explosion(float X, float Y)
+{
+    Flt xe,ye,r;
+    glBegin(GL_LINES);
+	for (int i=0; i<360; i++) {
+		r = rnd()*40.0+20.0;
+		xe = r*sin(i);
+		ye = r*cos(i);
+	    glColor3f(rnd()*.3+.7, rnd()*.3+.7, 0);
+	    glVertex2f(X, Y);
+	    glVertex2f(X+xe, Y+ye);
+	}
+	glEnd();
+		
+    return;
+};
+
+void nick_reset(int* dead)
+{
+	*dead = 0;
+};
+

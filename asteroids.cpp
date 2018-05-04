@@ -46,9 +46,7 @@ const int MAX_BULLETS = 1111;
 const int MAX_POWERUPS = 4;
 const int BULLETSPEED = 40;
 const Flt MINIMUM_ASTEROID_SIZE = 60.0;
-int GODMODE = 1;
-int DEAD = 0;
-int MAX_ASTEROIDS = 3;
+int GODMODE = 0;
 //-----------------------------------------------------------------------------
 //Setup timers
 const double oobillion = 1.0 / 1e9;
@@ -70,8 +68,8 @@ public:
 	int xres, yres;
 	char keys[65536];
 	Global() {
-		xres = 1250;
-		yres = 900;
+		xres = 800;
+		yres = 1250;
 		memset(keys, 0, 65536);
 	}
 } gl;
@@ -104,6 +102,8 @@ public:
 	Asteroid *ahead;
 	Bullet *barr;
 	as_PowerUp *powerUps;
+	int dead;
+	int max_asteroids;
 	int nasteroids;
 	int nbullets;
 	int asterdestroyed;
@@ -112,6 +112,8 @@ public:
 	bool mouseThrustOn;
 public:
 	Game() {
+		dead = 0;
+		max_asteroids = 3;
 		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
 		powerUps = new as_PowerUp[MAX_POWERUPS];
@@ -121,7 +123,7 @@ public:
 		asterdestroyed = 0;
 		mouseThrustOn = false;
 		//build 10 asteroids...
-		for (int j=0; j<MAX_ASTEROIDS; j++) {
+		for (int j=0; j<max_asteroids; j++) {
 			Asteroid *a = new Asteroid;
 			a->nverts = 8;
 			a->radius = rnd()*80.0 + 40.0;
@@ -279,6 +281,10 @@ public:
 
 //function prototypes
 extern void nick_Lab7();
+extern void nick_explosion(float, float);
+extern int nick_dead(int, int, Asteroid*);
+extern void nick_reset(int*);
+
 extern int jtL_Lab7() ;
 void init_opengl(void);
 void check_mouse(XEvent *e);
@@ -286,13 +292,13 @@ void game_check_mouse(XEvent *e);
 extern void jt_menu_check_mouse(XEvent *e);
 int check_keys(XEvent *e);
 void physics();
+void game_physics_dead();
 void game_physics();
 extern void jt_menu_physics( void );
 void render();
 void game_render();
 extern void jt_menu_render( void );
 
-extern int nick_dead(int, int, Asteroid*);
 
 //==========================================================================
 // M A I N
@@ -578,16 +584,25 @@ void physics()
 {
 	switch (program_state) {
 		case GAME:
-			game_physics();
+			if (!g.dead)
+				game_physics();
+			if (g.dead)
+				game_physics_dead();
 		case MENU:
 			jt_menu_physics();
 	}
 }
 
-
+void game_physics_dead()
+{
+	if (gl.keys[XK_y]) {
+		nick_reset(&g.dead);
+	}
+	return;
+}
 void game_physics()
 {
-    if (g.nasteroids < MAX_ASTEROIDS){
+    if (g.nasteroids < g.max_asteroids){
 			Asteroid *a = new Asteroid;
 			a->nverts = 8;
 			a->radius = rnd()*80.0 + 40.0;
@@ -726,7 +741,7 @@ void game_physics()
 	a = g.ahead;
 	while (a) {
 		if (nick_dead(g.ship.pos[0], g.ship.pos[1], a) && !GODMODE) {
-			DEAD = 1;
+			g.dead = 1;
 		}
 //		cout << DEAD << endl;
 //		d0 = g.ship.pos[0] - a->pos[0];
@@ -1047,46 +1062,46 @@ void game_render()
 	//
 	//-------------
 	//Draw the ship
-	if (!DEAD) {
+	if (!g.dead) {
 
-	glColor3fv(g.ship.color);
-	glPushMatrix();
-	glTranslatef(g.ship.pos[0], g.ship.pos[1], g.ship.pos[2]);
-	glRotatef(g.ship.angle, 0.0f, 0.0f, 1.0f);
-	glBegin(GL_TRIANGLES);
-		glVertex2f(-12.0f, -10.0f);
-		glVertex2f(  0.0f, 20.0f);
-		glVertex2f(  0.0f, -6.0f);
-		glVertex2f(  0.0f, -6.0f);
-		glVertex2f(  0.0f, 20.0f);
-		glVertex2f( 12.0f, -10.0f);
-	glEnd();
-	glColor3f(1.0f, 0.0f, 0.0f);
-	glBegin(GL_POINTS);
-		glVertex2f(0.0f, 0.0f);
-	glEnd();
-	glPopMatrix();
-	if (gl.keys[XK_Up] || g.mouseThrustOn) {
-		int i;
-		//draw thrust
-		Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
-		//convert angle to a vector
-		Flt xdir = cos(rad);
-		Flt ydir = sin(rad);
-		Flt xs,ys,xe,ye,r;
-		glBegin(GL_LINES);
-			for (i=0; i<16; i++) {
-				xs = -xdir * 11.0f + rnd() * 4.0 - 2.0;
-				ys = -ydir * 11.0f + rnd() * 4.0 - 2.0;
-				r = rnd()*40.0+40.0;
-				xe = -xdir * r + rnd() * 18.0 - 9.0;
-				ye = -ydir * r + rnd() * 18.0 - 9.0;
-				glColor3f(rnd()*.3+.7, rnd()*.3+.7, 0);
-				glVertex2f(g.ship.pos[0]+xs,g.ship.pos[1]+ys);
-				glVertex2f(g.ship.pos[0]+xe,g.ship.pos[1]+ye);
-			}
+		glColor3fv(g.ship.color);
+		glPushMatrix();
+		glTranslatef(g.ship.pos[0], g.ship.pos[1], g.ship.pos[2]);
+		glRotatef(g.ship.angle, 0.0f, 0.0f, 1.0f);
+		glBegin(GL_TRIANGLES);
+			glVertex2f(-12.0f, -10.0f);
+			glVertex2f(  0.0f, 20.0f);
+			glVertex2f(  0.0f, -6.0f);
+			glVertex2f(  0.0f, -6.0f);
+			glVertex2f(  0.0f, 20.0f);
+			glVertex2f( 12.0f, -10.0f);
 		glEnd();
-	}
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glBegin(GL_POINTS);
+			glVertex2f(0.0f, 0.0f);
+		glEnd();
+		glPopMatrix();
+		if (gl.keys[XK_Up] || g.mouseThrustOn) {
+			int i;
+			//draw thrust
+			Flt rad = ((g.ship.angle+90.0) / 360.0f) * PI * 2.0;
+			//convert angle to a vector
+			Flt xdir = cos(rad);
+			Flt ydir = sin(rad);
+			Flt xs,ys,xe,ye,r;
+			glBegin(GL_LINES);
+				for (i=0; i<16; i++) {
+					xs = -xdir * 11.0f + rnd() * 4.0 - 2.0;
+					ys = -ydir * 11.0f + rnd() * 4.0 - 2.0;
+					r = rnd()*40.0+40.0;
+					xe = -xdir * r + rnd() * 18.0 - 9.0;
+					ye = -ydir * r + rnd() * 18.0 - 9.0;
+					glColor3f(rnd()*.3+.7, rnd()*.3+.7, 0);
+					glVertex2f(g.ship.pos[0]+xs,g.ship.pos[1]+ys);
+					glVertex2f(g.ship.pos[0]+xe,g.ship.pos[1]+ye);
+				}
+			glEnd();
+		}
 
 	}
 	//------------------
@@ -1150,7 +1165,12 @@ void game_render()
 		glEnd();
 		++b;
 		}
-	}		
+	}
+
+	if (g.dead)
+	{
+		nick_explosion(g.ship.pos[0], g.ship.pos[1]);
+	}	
 }
 
 
