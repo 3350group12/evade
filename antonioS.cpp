@@ -6,6 +6,8 @@
 #include <iostream>
 #include <cmath>
 #include <ctime>
+#include <stdio.h>
+#include <stdlib.h>
 //defined types 
 #define PI 3.141592653589793
 
@@ -206,5 +208,12 @@ void colorPowerUps (Asteroid *a)
 void decreaseLives (as_PowerUp *powerUps) 
 {
     powerUps[2].stock--;    
+
+}
+
+void uploadScores(int points) {
+    //char str1[32] = "";
+
+
 
 }
