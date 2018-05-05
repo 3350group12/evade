@@ -201,3 +201,10 @@ void colorPowerUps (Asteroid *a)
 
 
 }
+
+
+void decreaseLives (as_PowerUp *powerUps) 
+{
+    powerUps[2].stock--;    
+
+}
