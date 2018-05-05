@@ -14,6 +14,7 @@ using namespace std;
 #include "fonts.h"
 #include "Asteroid.h"
 
+
 const double oobillion = 1.0 / 1e9;
 extern struct timespec timeStart, timeCurrent;
 extern double timeDiff(struct timespec *start, struct timespec *end);
@@ -108,8 +109,88 @@ void nick_explosion(float X, float Y)
     return;
 };
 
-void nick_reset(int* dead)
+void nick_reset(int* dead, Asteroid *ahead, int* nasteroids)
 {
 	*dead = 0;
+	Asteroid *node = ahead;
+	while (node->next) {
+		node = node->next;
+		if (node->prev == NULL) {
+			if (node->next == NULL) {
+				ahead = NULL;
+			} else {
+				node->next->prev = NULL;
+				ahead = node->next;
+			}
+		} else {
+			if (node->next == NULL) {
+				node->prev->next = NULL;
+			} else {
+				node->prev->next = node->next;
+				node->next->prev = node->prev;
+			}
+		}
+		delete node;
+		node = ahead;
+	}
+	if (node) {
+		node->pos[0] = -2000;
+		node->pos[1] = -2000;
+	}
+
+	*nasteroids = 0;
 };
 
+void nick_drawContinue(int xLim, int yLim, int lives, int score)
+{
+	Rect r;
+	r.centerx = xLim/2;
+	r.centery = yLim/2;
+	r.height = 45;
+	r.width = 85;
+	glColor3ub(100, 0, 20);
+	glBegin(GL_QUADS);
+		glVertex2i(r.centerx-r.width, r.centery-r.height);
+		glVertex2i(r.centerx-r.width, r.centery+r.height);
+		glVertex2i(r.centerx+r.width, r.centery+r.height);
+		glVertex2i(r.centerx+r.width, r.centery-r.height);
+	glEnd();
+	glPopMatrix();
+
+	r.centerx = xLim/2;
+	r.centery = yLim/2;
+	r.height = 40;
+	r.width = 80;
+	glColor3ub(20, 20, 20);
+	glBegin(GL_QUADS);
+		glVertex2i(r.centerx-r.width, r.centery-r.height);
+		glVertex2i(r.centerx-r.width, r.centery+r.height);
+		glVertex2i(r.centerx+r.width, r.centery+r.height);
+		glVertex2i(r.centerx+r.width, r.centery-r.height);
+    glEnd();
+
+	if (lives)
+	{
+		r.bot = r.centery;
+		r.left = r.centerx - 50;
+		r.center = 0;
+		ggprint16(&r, 28, 0x00ffdd00, "CONTINUE?");
+		ggprint16(&r, 28, 0x00ffdd00, "   Y / N");
+		glPopMatrix();
+	} else {
+		r.bot = r.centery;
+		r.left = r.centerx - 50;
+		r.center = 0;
+		ggprint16(&r, 28, 0x00ffdd00, "GAME OVER");
+		ggprint16(&r, 28, 0x00ffdd00, "Score: %i", score);
+		glPopMatrix();
+	}
+};
+
+void nick_score(int* score, int* difficulty)
+{
+	*score = *score+1;
+	if(*score%20 == 0) {
+		*difficulty = *difficulty+1;
+	}
+};

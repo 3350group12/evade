@@ -14,6 +14,7 @@
 #include <cstring>
 #include <ctime>
 #include <cmath>
+#include <stdlib.h>
 using namespace std;
 #include <unistd.h>
 #include <X11/Xlib.h>
@@ -103,6 +104,7 @@ public:
 	Bullet *barr;
 	as_PowerUp *powerUps;
 	int dead;
+	int lives;
 	int max_asteroids;
 	int nasteroids;
 	int nbullets;
@@ -113,6 +115,7 @@ public:
 public:
 	Game() {
 		dead = 0;
+		lives = 3;
 		max_asteroids = 3;
 		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
@@ -283,7 +286,9 @@ public:
 extern void nick_Lab7();
 extern void nick_explosion(float, float);
 extern int nick_dead(int, int, Asteroid*);
-extern void nick_reset(int*);
+extern void nick_reset(int*, Asteroid*, int*);
+extern void nick_drawContinue(int, int, int, int);
+extern void nick_score(int*, int*);
 
 extern int jtL_Lab7() ;
 void init_opengl(void);
@@ -595,8 +600,13 @@ void physics()
 
 void game_physics_dead()
 {
-	if (gl.keys[XK_y]) {
-		nick_reset(&g.dead);
+	if (gl.keys[XK_y] && g.lives) {
+		nick_reset(&g.dead, g.ahead, &g.nasteroids);
+		g.lives--;
+	}
+	if (gl.keys[XK_n]) {
+	    //if we get a menu, make this go to menu instead
+	    exit(0);
 	}
 	return;
 }
@@ -780,7 +790,7 @@ void game_physics()
 						g.ahead = ta;
 						g.nasteroids++;
 					}
-						g.asterdestroyed++;
+					nick_score(&g.asterdestroyed, &g.max_asteroids);
 				} else {
 					a->color[0] = 1.0;
 					a->color[1] = 0.1;
@@ -789,7 +799,7 @@ void game_physics()
 					//delete the asteroid and bullet
 					Asteroid *savea = a->next;
 					deleteAsteroid(&g, a);
-					g.asterdestroyed++;
+					nick_score(&g.asterdestroyed, &g.max_asteroids);
 					a = savea;
 					g.nasteroids--;
 				}
@@ -825,7 +835,7 @@ void game_physics()
 						}
 						g.ahead = ta;
 						g.nasteroids++;
-						g.asterdestroyed++;
+						nick_score(&g.asterdestroyed, &g.max_asteroids);
 					}
 				} else {
 					a->color[0] = 1.0;
@@ -835,7 +845,7 @@ void game_physics()
 					//delete the asteroid and bullet
 					Asteroid *savea = a->next;
 					deleteAsteroid(&g, a);
-					g.asterdestroyed++;
+					nick_score(&g.asterdestroyed, &g.max_asteroids);
 					a = savea;
 					g.nasteroids--;
 				}
@@ -952,7 +962,7 @@ void game_physics()
 		    while (a) {
 		        Asteroid *savea = a->next;
 		        deleteAsteroid(&g, a);
-		        g.asterdestroyed++;
+				nick_score(&g.asterdestroyed, &g.max_asteroids);
 		        a = savea;
 		        g.nasteroids--;
                 g.powerUps[3].stock--;
@@ -1051,8 +1061,7 @@ void game_render()
 	    ggprint8b(&r, 16, 0x00ffff00, "GodMode available");
     }
     if (g.powerUps[2].stock) {
-	    ggprint8b(&r, 16, 0x00ffff00, "Lives available: %i", 
-            g.powerUps[2].stock);
+	    ggprint8b(&r, 16, 0x00ffff00, "Lives: %i", g.lives);
     }
     if (g.powerUps[3].stock) {
 	    ggprint8b(&r, 16, 0x00ffff00, "Clears available: %i", 
@@ -1170,6 +1179,7 @@ void game_render()
 	if (g.dead)
 	{
 		nick_explosion(g.ship.pos[0], g.ship.pos[1]);
+		nick_drawContinue(gl.xres, gl.yres, g.lives, g.asterdestroyed);
 	}	
 }
 
