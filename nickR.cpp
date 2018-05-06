@@ -20,6 +20,19 @@ extern struct timespec timeStart, timeCurrent;
 extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 
+//class Star {
+//public:
+//	Vec pos;
+//	Vec vel;
+//	float color[3];
+//	struct Star *prev;
+//	struct Star *next;
+//public:
+//	Star() {
+//		prev = NULL;
+//		next = NULL;
+//	}
+//};
 
 void nick_Lab7()
 {
@@ -187,10 +200,13 @@ void nick_drawContinue(int xLim, int yLim, int lives, int score)
 	}
 };
 
-void nick_score(int* score, int* difficulty)
+void nick_score(int* score, int* asteroidlim, float* asteroidspd)
 {
 	*score = *score+1;
-	if(*score%20 == 0) {
-		*difficulty = *difficulty+1;
+	if (*score%20 == 0) {
+		*asteroidlim = *asteroidlim + 1;
+	}
+	if (*score%100 ==0) {
+		*asteroidspd = *asteroidspd + 0.5;
 	}
 };

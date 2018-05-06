@@ -37,7 +37,6 @@ int program_state = GAME;
 
 const float timeslice = 1.0f;
 const float gravity = -0.2f;
-const float ASTEROID_VEL_MAX = -10.0;
 const float SHIPSPEED = 10;
 #define PI 3.141592653589793
 #define ALPHA 1
@@ -101,6 +100,7 @@ class Game {
 public:
 	Ship ship;
 	Asteroid *ahead;
+//	Star *shead;	
 	Bullet *barr;
 	as_PowerUp *powerUps;
 	int dead;
@@ -109,6 +109,8 @@ public:
 	int nasteroids;
 	int nbullets;
 	int asterdestroyed;
+	float firerate;
+	float asteroid_vel_max;
 	struct timespec bulletTimer;
 	struct timespec mouseThrustTimer;
 	bool mouseThrustOn;
@@ -117,6 +119,8 @@ public:
 		dead = 0;
 		lives = 3;
 		max_asteroids = 3;
+		firerate = 0.3;
+		asteroid_vel_max = 5.0;
 		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
 		powerUps = new as_PowerUp[MAX_POWERUPS];
@@ -126,7 +130,7 @@ public:
 		asterdestroyed = 0;
 		mouseThrustOn = false;
 		//build 10 asteroids...
-		for (int j=0; j<max_asteroids; j++) {
+		for (int j=0; j<1; j++) {
 			Asteroid *a = new Asteroid;
 			a->nverts = 8;
 			a->radius = rnd()*80.0 + 40.0;
@@ -288,7 +292,7 @@ extern void nick_explosion(float, float);
 extern int nick_dead(int, int, Asteroid*);
 extern void nick_reset(int*, Asteroid*, int*);
 extern void nick_drawContinue(int, int, int, int);
-extern void nick_score(int*, int*);
+extern void nick_score(int*, int*, float*);
 
 extern int jtL_Lab7() ;
 void init_opengl(void);
@@ -625,8 +629,7 @@ void game_physics()
 				angle += inc;
 			}
 			a->pos[0] = (Flt)(rand() % gl.xres);
-//			a->pos[1] = (Flt)(rand() % gl.yres);
-			a->pos[1] = (Flt)(gl.yres + 100);
+			a->pos[1] = (Flt)(rand() % gl.yres + gl.yres + 100);
 			a->pos[2] = 0.0f;
 			a->angle = 0.0;
 			a->rotate = rnd() * 4.0 - 2.0;
@@ -709,8 +712,15 @@ void game_physics()
 	while (a) {
 	    	a->vel[1] += gravity;
 //		a->vel[0] = a->vel[0] * 0.8;
-		if (a->vel[1] < ASTEROID_VEL_MAX)
-		    a->vel[1] = ASTEROID_VEL_MAX;
+		if (abs(a->vel[1]) > g.asteroid_vel_max)
+		    a->vel[1] = -g.asteroid_vel_max;
+		if (abs(a->vel[0]) > g.asteroid_vel_max) {
+			if (a->vel[0] < 0) {
+				a->vel[0] = -(g.asteroid_vel_max);
+			} else {
+				a->vel[0] = g.asteroid_vel_max;
+			}
+		}
 		a->pos[0] += a->vel[0];
 		a->pos[1] += a->vel[1];
 		//Check for collision with window edges
@@ -790,7 +800,8 @@ void game_physics()
 						g.ahead = ta;
 						g.nasteroids++;
 					}
-					nick_score(&g.asterdestroyed, &g.max_asteroids);
+					nick_score(&g.asterdestroyed, &g.max_asteroids,
+							&g.asteroid_vel_max);
 				} else {
 					a->color[0] = 1.0;
 					a->color[1] = 0.1;
@@ -799,7 +810,8 @@ void game_physics()
 					//delete the asteroid and bullet
 					Asteroid *savea = a->next;
 					deleteAsteroid(&g, a);
-					nick_score(&g.asterdestroyed, &g.max_asteroids);
+					nick_score(&g.asterdestroyed, &g.max_asteroids,
+							&g.asteroid_vel_max);
 					a = savea;
 					g.nasteroids--;
 				}
@@ -835,7 +847,8 @@ void game_physics()
 						}
 						g.ahead = ta;
 						g.nasteroids++;
-						nick_score(&g.asterdestroyed, &g.max_asteroids);
+						nick_score(&g.asterdestroyed, &g.max_asteroids,
+								&g.asteroid_vel_max);
 					}
 				} else {
 					a->color[0] = 1.0;
@@ -845,7 +858,8 @@ void game_physics()
 					//delete the asteroid and bullet
 					Asteroid *savea = a->next;
 					deleteAsteroid(&g, a);
-					nick_score(&g.asterdestroyed, &g.max_asteroids);
+					nick_score(&g.asterdestroyed, &g.max_asteroids,
+							&g.asteroid_vel_max);
 					a = savea;
 					g.nasteroids--;
 				}
@@ -927,7 +941,7 @@ void game_physics()
 		struct timespec bt;
 		clock_gettime(CLOCK_REALTIME, &bt);
 		double ts = timeDiff(&g.bulletTimer, &bt);
-		if (ts > 0.1) {
+		if (ts > g.firerate) {
 			timeCopy(&g.bulletTimer, &bt);
 			if (g.nbullets < MAX_BULLETS) {
 				//shoot a bullet...
@@ -947,7 +961,7 @@ void game_physics()
 				b->pos[0] += xdir*20.0f;
 				b->pos[1] += ydir*20.0f;
 				b->vel[0] += xdir*6.0f + rnd()*0.1;
-				b->vel[1] += ydir*6.0f + rnd()*0.1;
+				b->vel[1] += BULLETSPEED;
 				b->color[0] = 1.0f;
 				b->color[1] = 1.0f;
 				b->color[2] = 1.0f;
@@ -962,7 +976,8 @@ void game_physics()
 		    while (a) {
 		        Asteroid *savea = a->next;
 		        deleteAsteroid(&g, a);
-				nick_score(&g.asterdestroyed, &g.max_asteroids);
+				nick_score(&g.asterdestroyed, &g.max_asteroids,
+						&g.asteroid_vel_max);
 		        a = savea;
 		        g.nasteroids--;
                 g.powerUps[3].stock--;
