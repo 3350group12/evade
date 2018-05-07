@@ -1,6 +1,4 @@
-//
-//
-//
+
 //Modified by: Antonio Solorio
 //program: asteroids.cpp
 //author:  Gordon Griesel
