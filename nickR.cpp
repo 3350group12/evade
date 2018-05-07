@@ -210,3 +210,95 @@ void nick_score(int* score, int* asteroidlim, float* asteroidspd)
 		*asteroidspd = *asteroidspd + 0.5;
 	}
 };
+
+void drawCircle(Flt radius,
+		float r, float g, float b,
+		float xc, float yc) {
+	float x, y;
+	int points = 30;
+	glColor3f(r, g, b);
+	glBegin(GL_TRIANGLE_FAN);
+	for (int i=0; i<points; i++){
+		x = radius * cos(i) + xc;
+		y = radius * sin(i) + yc;
+		glVertex3f (x, y, 0);
+
+		x = radius * cos(i+0.3) + xc;
+		y = radius * sin(i+0.3) + yc;
+		glVertex3f (x, y, 0);
+	}
+	glEnd();
+	glPopMatrix();
+};
+
+void nick_drawAsteroid(Flt radius,
+		float r, float g, float b,
+		float x, float y,
+		float velx, float vely,
+		float angle) {
+
+	float circlex;
+	float circley;
+	float circler;
+	float trailr;
+	float trailg;
+	float trailb;
+	float bright;
+//	int randfactor = 70;
+
+	//trail 3
+	bright = rand()%70;
+	trailr = (255-(bright))/255;
+	trailg = (200-(bright))/255;
+	trailb = 0;
+	circlex = x - radius * velx/7;
+	circley = y - radius * vely/3.5;
+	circler = radius/4;
+	drawCircle(circler, trailr, trailg, trailb, circlex, circley);
+
+	//trail 2
+	bright = rand()%70;
+	trailr = (255-(bright))/255;
+	trailg = (165-(bright))/255;
+	trailb = 0;
+	circlex = x - radius * velx/10;
+	circley = y - radius * vely/5;
+	circler = radius/2;
+	drawCircle(circler, trailr, trailg, trailb, circlex, circley);
+
+	//trail 1
+	bright = rand()%70;
+	trailr = (255-(bright))/255;
+	trailg = (100-(bright))/255;
+	trailb = 0;
+	circlex = x - radius * velx/17;
+	circley = y - radius * vely/8.5;
+	circler = 3*radius/4;
+	drawCircle(circler, trailr, trailg, trailb, circlex, circley);
+
+	//main circle
+	drawCircle(radius+1, 0,0,0, x, y);
+	drawCircle(radius, r, g, b, x, y);
+	
+	//crater 1
+	circlex = radius/3 * cos(angle) + x;
+	circley = radius/3 * sin(angle) + y;
+	circler = radius/3;
+	drawCircle(circler+1, r/4, g/4, b/4, circlex, circley);
+	drawCircle(circler, r/4, g/4, b/4, circlex, circley);
+
+	//crater 2
+	circlex = 3*radius/5 * cos(angle + 2.5) + x;
+	circley = 3*radius/5 * sin(angle + 2.5) + y;
+	circler = radius/5;
+	drawCircle(circler+1, r/4, g/4, b/4, circlex, circley);
+	drawCircle(circler, r/4, g/4, b/4, circlex, circley);
+
+	//crater 3
+	circlex = 4*radius/6 * cos(angle + 4) + x;
+	circley = 4*radius/6 * sin(angle + 4) + y;
+	circler = radius/10;
+	drawCircle(circler+1, r/4, g/4, b/4, circlex, circley);
+	drawCircle(circler, r/4, g/4, b/4, circlex, circley);
+
+};

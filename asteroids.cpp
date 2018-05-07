@@ -1,5 +1,5 @@
 
-//Modified by: Antonio Solorio
+//Modified by: Antonio Solorio, Nicholas Rosbrugh 
 //program: asteroids.cpp
 //author:  Gordon Griesel
 //date:    2014 - 2018
@@ -130,22 +130,22 @@ public:
 		//build 10 asteroids...
 		for (int j=0; j<1; j++) {
 			Asteroid *a = new Asteroid;
-			a->nverts = 8;
+//			a->nverts = 8;
 			a->radius = rnd()*80.0 + 40.0;
 			Flt r2 = a->radius / 2.0;
-			Flt angle = 0.0f;
-			Flt inc = (PI * 2.0) / (Flt)a->nverts;
-			for (int i=0; i<a->nverts; i++) {
-				a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
-				a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
-				angle += inc;
-			}
+//			Flt angle = 0.0f;
+//			Flt inc = (PI * 2.0) / (Flt)a->nverts;
+//			for (int i=0; i<a->nverts; i++) {
+//				a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
+//				a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
+//				angle += inc;
+//			}
 			a->pos[0] = (Flt)(rand() % gl.xres);
 //			a->pos[1] = (Flt)(rand() % gl.yres);
 			a->pos[1] = (Flt)(gl.yres + 100);
 			a->pos[2] = 0.0f;
 			a->angle = 0.0;
-			a->rotate = rnd() * 4.0 - 2.0;
+			a->rotate = rnd() * 0.1 - 0.05;
 			a->color[0] = rnd();
 			a->color[1] = rnd();
 			a->color[2] = rnd();
@@ -291,6 +291,11 @@ extern int nick_dead(int, int, Asteroid*);
 extern void nick_reset(int*, Asteroid*, int*);
 extern void nick_drawContinue(int, int, int, int);
 extern void nick_score(int*, int*, float*);
+extern void nick_drawAsteroid(Flt,
+		float, float, float,
+		float, float,
+		float, float,
+		float);
 
 extern int jtL_Lab7() ;
 void init_opengl(void);
@@ -562,22 +567,22 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
 
 	extern void physicSwitch(Asteroid *a, bool value);
 	//build ta from a
-	ta->nverts = 8;
+//	ta->nverts = 8;
 	physicSwitch(ta, true);
 	ta->radius = a->radius / 2.0;
 	Flt r2 = ta->radius / 2.0;
 	Flt angle = 0.0f;
-	Flt inc = (PI * 2.0) / (Flt)ta->nverts;
-	for (int i=0; i<ta->nverts; i++) {
-		ta->vert[i][0] = sin(angle) * (r2 + rnd() * ta->radius);
-		ta->vert[i][1] = cos(angle) * (r2 + rnd() * ta->radius);
-		angle += inc;
-	}
+//	Flt inc = (PI * 2.0) / (Flt)ta->nverts;
+//	for (int i=0; i<ta->nverts; i++) {
+//		ta->vert[i][0] = sin(angle) * (r2 + rnd() * ta->radius);
+//		ta->vert[i][1] = cos(angle) * (r2 + rnd() * ta->radius);
+//		angle += inc;
+//	}
 	ta->pos[0] = a->pos[0] + rnd()*10.0-5.0;
 	ta->pos[1] = a->pos[1] + rnd()*10.0-5.0;
 	ta->pos[2] = 0.0f;
 	ta->angle = 0.0;
-	ta->rotate = a->rotate + (rnd() * 4.0 - 2.0);
+	ta->rotate = a->rotate + (rnd() * 0.1 - 0.05);
 	ta->color[0] = a->color[0];
 	ta->color[1] = a->color[1];
 	ta->color[2] = a->color[2];
@@ -616,21 +621,21 @@ void game_physics()
 {
     if (g.nasteroids < g.max_asteroids){
 			Asteroid *a = new Asteroid;
-			a->nverts = 8;
+//			a->nverts = 8;
 			a->radius = rnd()*80.0 + 40.0;
 			Flt r2 = a->radius / 2.0;
 			Flt angle = 0.0f;
-			Flt inc = (PI * 2.0) / (Flt)a->nverts;
-			for (int i=0; i<a->nverts; i++) {
-				a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
-				a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
-				angle += inc;
-			}
+//			Flt inc = (PI * 2.0) / (Flt)a->nverts;
+//			for (int i=0; i<a->nverts; i++) {
+//				a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
+//				a->vert[i][1] = cos(angle) * (r2 + rnd() * a->radius);
+//				angle += inc;
+//			}
 			a->pos[0] = (Flt)(rand() % gl.xres);
 			a->pos[1] = (Flt)(rand() % gl.yres + gl.yres + 100);
 			a->pos[2] = 0.0f;
 			a->angle = 0.0;
-			a->rotate = rnd() * 4.0 - 2.0;
+			a->rotate = rnd() * 0.1 - 0.05;
 			a->color[0] = rnd();
 			a->color[1] = rnd();
 			a->color[2] = rnd();
@@ -1128,23 +1133,28 @@ void game_render()
 	{
 		Asteroid *a = g.ahead;
 		while (a) {
+			nick_drawAsteroid(a->radius,
+					a->color[0], a->color[1], a->color[2],
+					a->pos[0], a->pos[1],
+					a->vel[0], a->vel[1],
+					a->angle);
 			//Log("draw asteroid...\n");
-			glColor3fv(a->color);
-			glPushMatrix();
-			glTranslatef(a->pos[0], a->pos[1], a->pos[2]);
-			glRotatef(a->angle, 0.0f, 0.0f, 1.0f);
-			glBegin(GL_TRIANGLE_FAN);
-				//Log("%i verts\n",a->nverts);
-				for (int j=0; j<a->nverts; j++) {
-					glVertex2f(a->vert[j][0],
-						a->vert[j][1]);
-				}
-			glEnd();
-			glPopMatrix();
-			glColor3f(1.0f, 0.0f, 0.0f);
-			glBegin(GL_POINTS);
-				glVertex2f(a->pos[0], a->pos[1]);
-			glEnd();
+//			glColor3fv(a->color);
+//			glPushMatrix();
+//			glTranslatef(a->pos[0], a->pos[1], a->pos[2]);
+//			glRotatef(a->angle, 0.0f, 0.0f, 1.0f);
+//			glBegin(GL_TRIANGLE_FAN);
+//				//Log("%i verts\n",a->nverts);
+//				for (int j=0; j<a->nverts; j++) {
+//					glVertex2f(a->vert[j][0],
+//						a->vert[j][1]);
+//				}
+//			glEnd();
+//			glPopMatrix();
+//			glColor3f(1.0f, 0.0f, 0.0f);
+//			glBegin(GL_POINTS);
+//				glVertex2f(a->pos[0], a->pos[1]);
+//			glEnd();
 			a = a->next;
 		}
 	}
