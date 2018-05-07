@@ -637,7 +637,7 @@ void game_physics()
 //			a->vel[0] = (Flt)(rnd()*2.0-1.0);
 //			a->vel[1] = (Flt)(rnd()*2.0-1.0);
 			a->vel[0] = 0;
-			a->vel[0] = 0;
+			a->vel[1] = 0;
 			//std::cout << "asteroid" << std::endl;
 			//add to front of linked list
 			a->next = g.ahead;
@@ -674,32 +674,28 @@ void game_physics()
 	while (i < g.nbullets) {
 		Bullet *b = &g.barr[i];
 		//How long has bullet been alive?
-		double ts = timeDiff(&b->time, &bt);
-		if (ts > 2.5) {
-			//time to delete the bullet.
-			memcpy(&g.barr[i], &g.barr[g.nbullets-1],
-				sizeof(Bullet));
-			g.nbullets--;
-			//do not increment i.
-			continue;
-		}
+//		double ts = timeDiff(&b->time, &bt);
+//		if (ts > 2.5) {
+//			//time to delete the bullet.
+//			memcpy(&g.barr[i], &g.barr[g.nbullets-1],
+//				sizeof(Bullet));
+//			g.nbullets--;
+//			//do not increment i.
+//			continue;
+//		}
 		//move the bullet
 		b->pos[0] += b->vel[0];
 		b->pos[1] += b->vel[1];
 		//Check for collision with window edges
-//		if (b->pos[0] < 0.0) {
-//			
-//            b->pos[0] += (float)gl.xres;
-//		}
-//		else if (b->pos[0] > (float)gl.xres) {
-//			b->pos[0] -= (float)gl.xres;
-//		}
-//		else if (b->pos[1] < 0.0) {
-//			b->pos[1] += (float)gl.yres;
-//		}
-//		else if (b->pos[1] > (float)gl.yres) {
-//			b->pos[1] -= (float)gl.yres;
-//		}
+		if (b->pos[0] < 0.0 || 
+			b->pos[0] > (float)gl.xres || 
+			b->pos[1] < 0.0 ||
+			b->pos[1] > (float)gl.yres) {
+			memcpy(&g.barr[i], &g.barr[g.nbullets-1],
+				sizeof(Bullet));
+			g.nbullets--;
+			continue;
+		}
 		i++;
 	}
 	//
@@ -783,7 +779,7 @@ void game_physics()
 				//break it into pieces.
 					Asteroid *ta = a;
 					buildAsteroidFragment(ta, a);
-					int r = rand()%10+5;
+					int r = rand()%3+3;
 					for (int k=0; k<r; k++) {
 						//get the next asteroid position
 						//in the array
@@ -826,12 +822,13 @@ void game_physics()
 			if (((dist - SUPER < (a->radius*a->radius)) || (dist + SUPER < (a->radius*a->radius)) || (dist < (a->radius*a->radius))) && b->super) {
 				//cout << "asteroid hit." << endl;
 				//this asteroid is hit.
-				classifyAsteroid(a, g.powerUps);
-				if (a->radius > MINIMUM_ASTEROID_SIZE) {
+//				classifyAsteroid(a, g.powerUps);
+//				if (a->radius > MINIMUM_ASTEROID_SIZE) {
+				if (0) {
 					//break it into pieces.
 					Asteroid *ta = a;
 					buildAsteroidFragment(ta, a);
-					int r = rand()%10+5;
+					int r = rand()%3+3;
 					for (int k=0; k<r; k++) {
 						//get the next asteroid position
 						//in the array
