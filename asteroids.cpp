@@ -26,6 +26,7 @@ using namespace std;
 #include "Asteroid.h"
 #include "Bullet.h"
 #include "antonioS.h"
+#include "nickR.h"
 
 //constants
 const int MENU = 0;
@@ -43,7 +44,7 @@ const int SUPERSIZE = (sqrt(SUPER)/20 +20);
 const int MAX_BULLETS = 1111;
 const int MAX_POWERUPS = 4;
 const int BULLETSPEED = 40;
-const Flt MINIMUM_ASTEROID_SIZE = 60.0;
+const Flt MINIMUM_ASTEROID_SIZE = 30.0;
 int GODMODE = 0;
 //-----------------------------------------------------------------------------
 //Setup timers
@@ -98,7 +99,7 @@ class Game {
 public:
 	Ship ship;
 	Asteroid *ahead;
-//	Star *shead;	
+	Star *shead;	
 	Bullet *barr;
 	as_PowerUp *powerUps;
 	int dead;
@@ -107,6 +108,8 @@ public:
 	int nasteroids;
 	int nbullets;
 	int asterdestroyed;
+	int starmax;
+	int stars;
 	float firerate;
 	float asteroid_vel_max;
 	struct timespec bulletTimer;
@@ -114,6 +117,8 @@ public:
 	bool mouseThrustOn;
 public:
 	Game() {
+		starmax = 200;
+		stars = 0;
 		dead = 0;
 		lives = 3;
 		max_asteroids = 3;
@@ -131,8 +136,8 @@ public:
 		for (int j=0; j<1; j++) {
 			Asteroid *a = new Asteroid;
 //			a->nverts = 8;
-			a->radius = rnd()*80.0 + 40.0;
-			Flt r2 = a->radius / 2.0;
+			a->radius = rnd()*20.0 + 30.0;
+//			Flt r2 = a->radius / 2.0;
 //			Flt angle = 0.0f;
 //			Flt inc = (PI * 2.0) / (Flt)a->nverts;
 //			for (int i=0; i<a->nverts; i++) {
@@ -146,14 +151,14 @@ public:
 			a->pos[2] = 0.0f;
 			a->angle = 0.0;
 			a->rotate = rnd() * 0.1 - 0.05;
-			a->color[0] = rnd();
-			a->color[1] = rnd();
-			a->color[2] = rnd();
+			a->color[0] = 0.27;
+			a->color[1] = 0.15;
+			a->color[2] = 0.04;
             
 //			a->vel[0] = (Flt)(rnd()*2.0-1.0);
 //			a->vel[1] = (Flt)(rnd()*2.0-1.0);
 			a->vel[0] = 0;
-			a->vel[0] = 0;
+			a->vel[1] = 0;
 			//std::cout << "asteroid" << std::endl;
 			//add to front of linked list
 			a->next = ahead;
@@ -168,6 +173,8 @@ public:
 		delete [] barr;
 	}
 } g;
+
+Star* starfield;
 
 //X Windows variables
 class X11_wrapper {
@@ -296,6 +303,9 @@ extern void nick_drawAsteroid(Flt,
 		float, float,
 		float, float,
 		float);
+extern void nick_generate_starfield(Star*, int, int, int, int*);
+extern void nick_update_starfield(Star*, int, int, int, float, int*);
+extern void nick_draw_starfield(Star*);
 
 extern int jtL_Lab7() ;
 void init_opengl(void);
@@ -321,6 +331,7 @@ int main()
 	init_opengl();
 	srand(time(NULL));
 	x11.set_mouse_position(100, 100);
+	nick_generate_starfield(starfield, gl.xres, gl.yres, g.starmax, &g.stars);
 	int done=0;
 	while (!done) {
 		while (x11.getXPending()) {
@@ -570,8 +581,8 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
 //	ta->nverts = 8;
 	physicSwitch(ta, true);
 	ta->radius = a->radius / 2.0;
-	Flt r2 = ta->radius / 2.0;
-	Flt angle = 0.0f;
+//	Flt r2 = ta->radius / 2.0;
+//	Flt angle = 0.0f;
 //	Flt inc = (PI * 2.0) / (Flt)ta->nverts;
 //	for (int i=0; i<ta->nverts; i++) {
 //		ta->vert[i][0] = sin(angle) * (r2 + rnd() * ta->radius);
@@ -619,12 +630,14 @@ void game_physics_dead()
 }
 void game_physics()
 {
+//	nick_update_starfield(starfield, gl.xres, gl.yres, g.starmax,
+//			g.asteroid_vel_max, &g.stars);
     if (g.nasteroids < g.max_asteroids){
 			Asteroid *a = new Asteroid;
 //			a->nverts = 8;
-			a->radius = rnd()*80.0 + 40.0;
-			Flt r2 = a->radius / 2.0;
-			Flt angle = 0.0f;
+			a->radius = rnd()*20.0 + 30.0;
+//			Flt r2 = a->radius / 2.0;
+//			Flt angle = 0.0f;
 //			Flt inc = (PI * 2.0) / (Flt)a->nverts;
 //			for (int i=0; i<a->nverts; i++) {
 //				a->vert[i][0] = sin(angle) * (r2 + rnd() * a->radius);
@@ -636,9 +649,9 @@ void game_physics()
 			a->pos[2] = 0.0f;
 			a->angle = 0.0;
 			a->rotate = rnd() * 0.1 - 0.05;
-			a->color[0] = rnd();
-			a->color[1] = rnd();
-			a->color[2] = rnd();
+			a->color[0] = 0.27;
+			a->color[1] = 0.15;
+			a->color[2] = 0.04;
 //			a->vel[0] = (Flt)(rnd()*2.0-1.0);
 //			a->vel[1] = (Flt)(rnd()*2.0-1.0);
 			a->vel[0] = 0;
@@ -780,7 +793,7 @@ void game_physics()
 				//cout << "asteroid hit." << endl;
 				//this asteroid is hit.
 				classifyAsteroid(a, g.powerUps);
-				if (a->radius > MINIMUM_ASTEROID_SIZE) {
+				if (a->radius >= MINIMUM_ASTEROID_SIZE) {
 				//break it into pieces.
 					Asteroid *ta = a;
 					buildAsteroidFragment(ta, a);
@@ -1057,6 +1070,7 @@ void render()
 
 void game_render()
 {
+	nick_draw_starfield(starfield);
 
 	Rect r;
 	glClear(GL_COLOR_BUFFER_BIT);

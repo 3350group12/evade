@@ -20,19 +20,112 @@ extern struct timespec timeStart, timeCurrent;
 extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 
-//class Star {
-//public:
-//	Vec pos;
-//	Vec vel;
-//	float color[3];
-//	struct Star *prev;
-//	struct Star *next;
-//public:
-//	Star() {
-//		prev = NULL;
-//		next = NULL;
-//	}
-//};
+class Star {
+public:
+	Vec pos;
+	int starx[20];
+	int stary[20];
+	struct Star *prev;
+	struct Star *next;
+public:
+    Star(){
+		for (int i=0; i<20; i++) {
+		    starx[i] = rand()%100 - 50;
+	    	stary[i] = rand()%100 - 50;
+		}
+    }
+};
+
+
+void nick_generate_starfield(Star* starfield, int xres, int yres, int starmax,
+		int* stars)
+{
+	for (int i=0; i< starmax/2; i++) {
+		Star *s = new Star;
+		s->pos[0] = (Flt)(rand()%(xres));
+		s->pos[1] = (Flt)(rand()%(yres));
+		s->pos[2] = 0.0f;
+		s->next = starfield;
+		if (starfield != NULL) {
+			starfield->prev = s;
+		}
+		*stars = *stars + 1;
+		starfield = s;
+	}
+};
+
+void nick_update_starfield(Star* starfield, int xres, int yres, int starmax,
+		float velmax, int* stars)
+{
+	while (*stars < starmax) {
+		Star *s = new Star;
+		s->pos[0] = (Flt)(rand()%xres + xres);
+		s->pos[1] = (Flt)(rand()%yres + yres) + 50;
+		s->pos[2] = 0.0f;
+		s->next = starfield;
+		if (starfield != NULL) {
+			starfield->prev = s;
+		}
+		*stars = *stars + 1;
+		starfield = s;
+	}
+	Star *s = starfield;
+	while (s) {
+		s->pos[1] = s->pos[1]-(velmax/2);
+		if (s->pos[1] < -50) {
+			Star *saves = s->next;
+			//
+			if (s->prev == NULL) {
+				if (s->next == NULL) {
+					starfield = NULL;
+				} else {
+					s->next->prev = NULL;
+					starfield = s->next;
+				}
+			} else {
+				if (s->next == NULL) {
+					s->prev->next = NULL;
+				} else {
+					s->prev->next = s->next;
+					s->next->prev = s->prev;
+				}
+			}
+			delete s;
+			s = NULL;
+			//
+			if(starfield == NULL) {
+				s = saves;
+			} else {
+				s = starfield;
+			}
+			*stars = *stars-1;
+		}
+	}
+};
+
+void nick_draw_starfield(Star* starfield)
+{
+	Star* s = starfield;
+	while (s) {
+		for (int i=0; i<20; i++) {
+			glColor3f(1.0, 1.0, 1.0);
+			glBegin(GL_POINTS);
+			glVertex2f(s->pos[0],		s->pos[1]);
+			glVertex2f(s->pos[0]-1.0f,	s->pos[1]);
+			glVertex2f(s->pos[0]+1.0f,	s->pos[1]);
+			glVertex2f(s->pos[0],		s->pos[1]-1.0f);
+			glVertex2f(s->pos[0],		s->pos[1]+1.0f);
+			glColor3f(0.8, 0.8, 0.8);
+			glVertex2f(s->pos[0]-1.0f,	s->pos[1]-1.0f);
+			glVertex2f(s->pos[0]-1.0f,	s->pos[1]+1.0f);
+			glVertex2f(s->pos[0]+1.0f,	s->pos[1]-1.0f);
+			glVertex2f(s->pos[0]+1.0f,	s->pos[1]+1.0f);
+			
+			glEnd();
+		}
+		s = s->next;
+	}
+};
 
 void nick_Lab7()
 {
@@ -302,3 +395,5 @@ void nick_drawAsteroid(Flt radius,
 	drawCircle(circler, r/4, g/4, b/4, circlex, circley);
 
 };
+
+
