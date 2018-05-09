@@ -7,6 +7,9 @@
 //mod spring 2018: X11 wrapper class
 //This program is a game starting point for a 3350 project.
 //
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -62,13 +65,69 @@ extern void classifyAsteroid(Asteroid *a, as_PowerUp *powerUps);
 
 //-----------------------------------------------------------------------------
 
+class Image {
+public:
+	int width, height;
+	unsigned char *data;
+	~Image() { delete [] data; }
+	Image(const char *fname) {
+		if (fname[0] == '\0')
+			return;
+		//printf("fname **%s**\n", fname);
+		char name[40];
+		strcpy(name, fname);
+		int slen = strlen(name);
+		name[slen-4] = '\0';
+		//printf("name **%s**\n", name);
+		char ppmname[80];
+		sprintf(ppmname,"%s.ppm", name);
+		//printf("ppmname **%s**\n", ppmname);
+		char ts[100];
+		//system("convert eball.jpg eball.ppm");
+		sprintf(ts, "convert %s %s", fname, ppmname);
+		system(ts);
+		//sprintf(ts, "%s", name);
+		FILE *fpi = fopen(ppmname, "r");
+		if (fpi) {
+			char line[200];
+			fgets(line, 200, fpi);
+			fgets(line, 200, fpi);
+			//skip comments and blank lines
+			while (line[0] == '#' || strlen(line) < 2)
+				fgets(line, 200, fpi);
+			sscanf(line, "%i %i", &width, &height);
+			fgets(line, 200, fpi);
+			//get pixel data
+			int n = width * height * 3;			
+			data = new unsigned char[n];			
+			for (int i=0; i<n; i++)
+				data[i] = fgetc(fpi);
+			fclose(fpi);
+		} else {
+			printf("ERROR opening image: %s\n",ppmname);
+			exit(0);
+		}
+		unlink(ppmname);
+	}
+};
+Image img[1] = {"space.jpg"};
+
+class Texture {
+public:
+	Image *backImage;
+	GLuint backTexture;
+	float xc[2];
+	float yc[2];
+};
+
 class Global {
 public:
 	int xres, yres;
 	char keys[65536];
+    Texture tex;
 	Global() {
-		xres = 800;
-		yres = 1250;
+		xres = 700;
+		yres = 1000;
 		memset(keys, 0, 65536);
 	}
 } gl;
@@ -98,8 +157,7 @@ public:
 class Game {
 public:
 	Ship ship;
-	Asteroid *ahead;
-	Star *shead;	
+	Asteroid *ahead;	
 	Bullet *barr;
 	as_PowerUp *powerUps;
 	int dead;
@@ -108,8 +166,6 @@ public:
 	int nasteroids;
 	int nbullets;
 	int asterdestroyed;
-	int starmax;
-	int stars;
 	float firerate;
 	float asteroid_vel_max;
 	struct timespec bulletTimer;
@@ -117,8 +173,6 @@ public:
 	bool mouseThrustOn;
 public:
 	Game() {
-		starmax = 200;
-		stars = 0;
 		dead = 0;
 		lives = 3;
 		max_asteroids = 3;
@@ -174,7 +228,6 @@ public:
 	}
 } g;
 
-Star* starfield;
 
 //X Windows variables
 class X11_wrapper {
@@ -303,9 +356,6 @@ extern void nick_drawAsteroid(Flt,
 		float, float,
 		float, float,
 		float);
-extern void nick_generate_starfield(Star*, int, int, int, int*);
-extern void nick_update_starfield(Star*, int, int, int, float, int*);
-extern void nick_draw_starfield(Star*);
 
 extern int jtL_Lab7() ;
 void init_opengl(void);
@@ -331,7 +381,6 @@ int main()
 	init_opengl();
 	srand(time(NULL));
 	x11.set_mouse_position(100, 100);
-	nick_generate_starfield(starfield, gl.xres, gl.yres, g.starmax, &g.stars);
 	int done=0;
 	while (!done) {
 		while (x11.getXPending()) {
@@ -368,6 +417,21 @@ void init_opengl(void)
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	//Do this to allow fonts
 	glEnable(GL_TEXTURE_2D);
+	initialize_fonts();
+    gl.tex.backImage = &img[0];
+    glGenTextures(1, &gl.tex.backTexture);
+	int w = gl.tex.backImage->width;
+	int h = gl.tex.backImage->height;
+	glBindTexture(GL_TEXTURE_2D, gl.tex.backTexture);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+							GL_RGB, GL_UNSIGNED_BYTE, gl.tex.backImage->data);
+	gl.tex.xc[0] = 0.0;
+	gl.tex.xc[1] = 1.;
+	gl.tex.yc[0] = 0.0;
+	gl.tex.yc[1] = 1.0;
+
 	initialize_fonts();
 }
 
@@ -630,8 +694,6 @@ void game_physics_dead()
 }
 void game_physics()
 {
-//	nick_update_starfield(starfield, gl.xres, gl.yres, g.starmax,
-//			g.asteroid_vel_max, &g.stars);
     if (g.nasteroids < g.max_asteroids){
 			Asteroid *a = new Asteroid;
 //			a->nverts = 8;
@@ -1052,6 +1114,8 @@ void game_physics()
 		if (tdif < -0.3)
 			g.mouseThrustOn = false;
 	}
+	gl.tex.yc[0] -= 0.001;
+	gl.tex.yc[1] -= 0.001;
 }
 
 
@@ -1070,10 +1134,20 @@ void render()
 
 void game_render()
 {
-	nick_draw_starfield(starfield);
+    glClear(GL_COLOR_BUFFER_BIT);
+	glColor3f(1.0, 1.0, 1.0);
+	glBindTexture(GL_TEXTURE_2D, gl.tex.backTexture);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glBegin(GL_QUADS);
+		glTexCoord2f(gl.tex.xc[0], gl.tex.yc[1]); glVertex2i(0, 0);
+		glTexCoord2f(gl.tex.xc[0], gl.tex.yc[0]); glVertex2i(0, gl.yres);
+		glTexCoord2f(gl.tex.xc[1], gl.tex.yc[0]); glVertex2i(gl.xres, gl.yres);
+		glTexCoord2f(gl.tex.xc[1], gl.tex.yc[1]); glVertex2i(gl.xres, 0);
+	glEnd();
 
 	Rect r;
-	glClear(GL_COLOR_BUFFER_BIT);
+//	glClear(GL_COLOR_BUFFER_BIT);
 	//
 	r.bot = gl.yres - 20;
 	r.left = 10;
@@ -1215,6 +1289,7 @@ void game_render()
 		nick_explosion(g.ship.pos[0], g.ship.pos[1]);
 		nick_drawContinue(gl.xres, gl.yres, g.lives, g.asterdestroyed);
 	}	
+
 }
 
 
