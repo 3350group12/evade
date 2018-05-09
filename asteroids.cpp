@@ -469,7 +469,6 @@ void game_check_mouse(XEvent *e)
 	static int savex = 0;
 	static int savey = 0;
 	static int ct=0;
-	const float BULLET_COLOR = 1.0f;
 	if (e->type != ButtonPress &&
 			e->type != ButtonRelease &&
 			e->type != MotionNotify)
@@ -479,16 +478,16 @@ void game_check_mouse(XEvent *e)
 	if (e->type == ButtonPress) {
 		if (e->xbutton.button==1) {
 			//Left button is down
-			}
+			
 		}
 		if (e->xbutton.button==3) {
 			//Right button is down
 		}
 	}
+	
 	if (e->type == MotionNotify) {
 		if (savex != e->xbutton.x || savey != e->xbutton.y) {
 			//Mouse moved
-			int xdiff = savex - e->xbutton.x;
 			if (++ct < 10)
 				return;		
 			//mouse moved along the x-axis.
