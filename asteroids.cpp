@@ -46,6 +46,7 @@ const int SUPERSIZE = (sqrt(SUPER)/20 +20);
 const int MAX_BULLETS = 1111;
 const int MAX_POWERUPS = 4;
 const int BULLETSPEED = 30;
+const int POWERUP_RATE = 5;
 const Flt MINIMUM_ASTEROID_SIZE = 30.0;
 int GODMODE = 0;
 //-----------------------------------------------------------------------------
@@ -56,7 +57,10 @@ extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 //-----------------------------------------------------------------------------
 //Extern Functions
-extern void classifyAsteroid(Asteroid *a, as_PowerUp *powerUps);
+extern void classifyAsteroid(Asteroid *a);
+extern void colorPowerUps(Asteroid *a, as_PowerUp *powerUps);
+extern void updatePowerUp(Asteroid *a, as_PowerUp *powerUps, const int POWERUP_RATE);
+extern void assignColors(as_PowerUp *powerUps);
 
 
 
@@ -182,6 +186,7 @@ public:
 		ahead = NULL;
 		barr = new Bullet[MAX_BULLETS];
 		powerUps = new as_PowerUp[MAX_POWERUPS];
+        assignColors(powerUps);
         powerUps[2].stock = 3;
 		nasteroids = 0;
 		nbullets = 0;
@@ -190,6 +195,9 @@ public:
 		//build 10 asteroids...
 		for (int j=0; j<1; j++) {
 			Asteroid *a = new Asteroid;
+            if (a->sequence < POWERUP_RATE) {
+                classifyAsteroid(a);
+            }
 //			a->nverts = 8;
 			a->radius = rnd()*20.0 + 30.0;
 //			Flt r2 = a->radius / 2.0;
@@ -206,10 +214,8 @@ public:
 			a->pos[2] = 0.0f;
 			a->angle = 0.0;
 			a->rotate = rnd() * 0.1 - 0.05;
-			if (a->sequence < 5) {
-				a->color[0] = 255.0/255.0;
-				a->color[1] = 215.0/255.0;
-				a->color[2] = 0.0;
+			if (a->type != -1) {
+                colorPowerUps(a, powerUps);
 			} else {
 				a->color[0] = 0.27;
 				a->color[1] = 0.15;
@@ -709,6 +715,9 @@ void game_physics()
 		g.godmode = nick_updateGodmode();
     if (g.nasteroids < g.max_asteroids){
 			Asteroid *a = new Asteroid;
+            if (a->sequence < POWERUP_RATE) {
+                classifyAsteroid(a);
+            }
 //			a->nverts = 8;
 			a->radius = rnd()*20.0 + 30.0;
 //			Flt r2 = a->radius / 2.0;
@@ -724,11 +733,9 @@ void game_physics()
 			a->pos[2] = 0.0f;
 			a->angle = 0.0;
 			a->rotate = rnd() * 0.1 - 0.05;
-			if (a->sequence < 5) {
-				a->color[0] = 255.0/255.0;
-				a->color[1] = 215.0/255.0;
-				a->color[2] = 0.0;
-			} else {
+			if (a->type != -1) {
+			    colorPowerUps(a, g.powerUps);
+            } else {
 				a->color[0] = 0.27;
 				a->color[1] = 0.15;
 				a->color[2] = 0.04;
@@ -873,7 +880,7 @@ void game_physics()
 			if (dist < (a->radius*a->radius) && !b->super) {
 				//cout << "asteroid hit." << endl;
 				//this asteroid is hit.
-				classifyAsteroid(a, g.powerUps);
+				updatePowerUp(a, g.powerUps, POWERUP_RATE);
 				if (a->radius >= MINIMUM_ASTEROID_SIZE) {
 				//break it into pieces.
 					Asteroid *ta = a;

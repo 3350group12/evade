@@ -16,8 +16,7 @@ public:
 	char* powerUP;
 	int stock;
 	as_PowerUp();
-	void generatePowerUp();
-	void updatePowerUp();
+	void generatePowerUp(int type);
 	int color[3];
 
 
