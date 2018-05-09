@@ -479,27 +479,6 @@ void game_check_mouse(XEvent *e)
 	if (e->type == ButtonPress) {
 		if (e->xbutton.button==1) {
 			//Left button is down
-			//a little time between each bullet
-			struct timespec bt;
-			clock_gettime(CLOCK_REALTIME, &bt);
-			double ts = timeDiff(&g.bulletTimer, &bt);
-			if (ts > 0.1) {
-				timeCopy(&g.bulletTimer, &bt);
-				//shoot a bullet...
-				if (g.nbullets < MAX_BULLETS) {
-					Bullet *b = &g.barr[g.nbullets];
-					timeCopy(&b->time, &bt);
-					b->pos[0] = g.ship.pos[0];
-					b->pos[1] = g.ship.pos[1];
-					b->vel[0] = g.ship.vel[0];
-					b->vel[1] = g.ship.vel[1];
-					b->vel[1] = BULLETSPEED;
-					b->color[0] = BULLET_COLOR;
-					b->color[1] = BULLET_COLOR;
-					b->color[2] = BULLET_COLOR;
-					b->super = false;
-					++g.nbullets;
-				}
 			}
 		}
 		if (e->xbutton.button==3) {
@@ -512,7 +491,6 @@ void game_check_mouse(XEvent *e)
 			int xdiff = savex - e->xbutton.x;
 			if (++ct < 10)
 				return;		
-			g.ship.pos[0] += -(float)xdiff;
 			//mouse moved along the x-axis.
 			x11.set_mouse_position(100, 100);
 			savex = savey = 100;
