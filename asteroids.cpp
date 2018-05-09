@@ -29,7 +29,6 @@ using namespace std;
 #include "Asteroid.h"
 #include "Bullet.h"
 #include "antonioS.h"
-#include "nickR.h"
 
 //constants
 const int MENU = 0;
@@ -46,7 +45,7 @@ const int SUPER = 100000;
 const int SUPERSIZE = (sqrt(SUPER)/20 +20);
 const int MAX_BULLETS = 1111;
 const int MAX_POWERUPS = 4;
-const int BULLETSPEED = 40;
+const int BULLETSPEED = 30;
 const Flt MINIMUM_ASTEROID_SIZE = 30.0;
 int GODMODE = 0;
 //-----------------------------------------------------------------------------
@@ -144,7 +143,7 @@ public:
 		VecZero(dir);
 		pos[0] = (Flt)(gl.xres/2);
 //		pos[1] = (Flt)(gl.yres/2);
-		pos[1] = (Flt)(15);
+		pos[1] = (Flt)(30);
 		pos[2] = 0.0f;
 		VecZero(vel);
 		angle = 0.0;
@@ -162,6 +161,7 @@ public:
 	as_PowerUp *powerUps;
 	int dead;
 	int lives;
+	int godmode;
 	int max_asteroids;
 	int nasteroids;
 	int nbullets;
@@ -173,6 +173,7 @@ public:
 	bool mouseThrustOn;
 public:
 	Game() {
+		godmode = 0;
 		dead = 0;
 		lives = 3;
 		max_asteroids = 3;
@@ -356,6 +357,8 @@ extern void nick_drawAsteroid(Flt,
 		float, float,
 		float, float,
 		float);
+extern void nick_drawBullet(int, int);
+extern void nick_drawShip(int, int, int);
 
 extern int jtL_Lab7() ;
 void init_opengl(void);
@@ -740,12 +743,12 @@ void game_physics()
 	else if (g.ship.pos[0] > (float)gl.xres) {
 		g.ship.pos[0] = (float)gl.xres;
 	}
-	else if (g.ship.pos[1] < 0.0) {
-		g.ship.pos[1] += (float)gl.yres;
-	}
-	else if (g.ship.pos[1] > (float)gl.yres) {
-		g.ship.pos[1] -= (float)gl.yres;
-	}
+//	else if (g.ship.pos[1] < 0.0) {
+//		g.ship.pos[1] += (float)gl.yres;
+//	}
+//	else if (g.ship.pos[1] > (float)gl.yres) {
+//		g.ship.pos[1] -= (float)gl.yres;
+//	}
 	//
 	//Update bullet positions
 	struct timespec bt;
@@ -834,7 +837,7 @@ void game_physics()
 	//      if asteroid small, delete it
 	a = g.ahead;
 	while (a) {
-		if (nick_dead(g.ship.pos[0], g.ship.pos[1], a) && !GODMODE) {
+		if (nick_dead(g.ship.pos[0], g.ship.pos[1], a) && !g.godmode) {
 			g.dead = 1;
 		}
 //		cout << DEAD << endl;
@@ -1137,8 +1140,6 @@ void game_render()
     glClear(GL_COLOR_BUFFER_BIT);
 	glColor3f(1.0, 1.0, 1.0);
 	glBindTexture(GL_TEXTURE_2D, gl.tex.backTexture);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 	glBegin(GL_QUADS);
 		glTexCoord2f(gl.tex.xc[0], gl.tex.yc[1]); glVertex2i(0, 0);
 		glTexCoord2f(gl.tex.xc[0], gl.tex.yc[0]); glVertex2i(0, gl.yres);
@@ -1147,19 +1148,17 @@ void game_render()
 	glEnd();
 
 	Rect r;
-//	glClear(GL_COLOR_BUFFER_BIT);
 	//
 	r.bot = gl.yres - 20;
 	r.left = 10;
 	r.center = 0;
-	ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
-	ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
-	ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
-	ggprint8b(&r, 16, 0x00ffff00, "n asteroids destroyed: %i",
+//	ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
+//	ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
+//	ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
+	ggprint8b(&r, 16, 0x00ffff00, "SCORE: %i",
 		g.asterdestroyed);
-    if (g.powerUps[0].stock) {
-	    ggprint8b(&r, 16, 0x00ffff00, "SuperBullets: %i", g.powerUps[0].stock);
-    }
+	ggprint8b(&r, 16, 0x00ffff00, "SuperBullets: %i", g.powerUps[0].stock);
+
     if (g.powerUps[1].stock) {
 	    ggprint8b(&r, 16, 0x00ffff00, "GodMode available");
     }
@@ -1176,7 +1175,9 @@ void game_render()
 	//Draw the ship
 	if (!g.dead) {
 
-		glColor3fv(g.ship.color);
+		nick_drawShip(g.ship.pos[0], g.ship.pos[1], g.godmode);
+
+/*		glColor3fv(g.ship.color);
 		glPushMatrix();
 		glTranslatef(g.ship.pos[0], g.ship.pos[1], g.ship.pos[2]);
 		glRotatef(g.ship.angle, 0.0f, 0.0f, 1.0f);
@@ -1214,7 +1215,7 @@ void game_render()
 				}
 			glEnd();
 		}
-
+*/
 	}
 	//------------------
 	//Draw the asteroids
@@ -1252,7 +1253,8 @@ void game_render()
 	for (int i=0; i<g.nbullets; i++) {
 		//Log("draw bullet...\n");
 		if (!b->super){
-	 		glColor3f(1.0, 1.0, 1.0);
+			nick_drawBullet(b->pos[0], b->pos[1]);
+/*	 		glColor3f(1.0, 1.0, 1.0);
 			glBegin(GL_POINTS);
 				glVertex2f(b->pos[0],      b->pos[1]);
 				glVertex2f(b->pos[0]-1.0f, b->pos[1]);
@@ -1265,7 +1267,7 @@ void game_render()
 				glVertex2f(b->pos[0]+1.0f, b->pos[1]-1.0f);
 				glVertex2f(b->pos[0]+1.0f, b->pos[1]+1.0f);
 			glEnd();
-			++b;
+*/			++b;
 		} else {
 		float x, y;
 		glColor3f(255.0/255.0, 165.0/255.0, 0.0/255.0);

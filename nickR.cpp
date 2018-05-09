@@ -20,113 +20,6 @@ extern struct timespec timeStart, timeCurrent;
 extern double timeDiff(struct timespec *start, struct timespec *end);
 extern void timeCopy(struct timespec *dest, struct timespec *source);
 
-class Star {
-public:
-	Vec pos;
-	int starx[20];
-	int stary[20];
-	struct Star *prev;
-	struct Star *next;
-public:
-    Star(){
-		for (int i=0; i<20; i++) {
-		    starx[i] = rand()%100 - 50;
-	    	stary[i] = rand()%100 - 50;
-		}
-    }
-};
-
-
-void nick_generate_starfield(Star* starfield, int xres, int yres, int starmax,
-		int* stars)
-{
-	for (int i=0; i< starmax/2; i++) {
-		Star *s = new Star;
-		s->pos[0] = (Flt)(rand()%(xres));
-		s->pos[1] = (Flt)(rand()%(yres));
-		s->pos[2] = 0.0f;
-		s->next = starfield;
-		if (starfield != NULL) {
-			starfield->prev = s;
-		}
-		*stars = *stars + 1;
-		starfield = s;
-	}
-};
-
-void nick_update_starfield(Star* starfield, int xres, int yres, int starmax,
-		float velmax, int* stars)
-{
-	while (*stars < starmax) {
-		Star *s = new Star;
-		s->pos[0] = (Flt)(rand()%xres + xres);
-		s->pos[1] = (Flt)(rand()%yres + yres) + 50;
-		s->pos[2] = 0.0f;
-		s->next = starfield;
-		if (starfield != NULL) {
-			starfield->prev = s;
-		}
-		*stars = *stars + 1;
-		starfield = s;
-	}
-	Star *s = starfield;
-	while (s) {
-		s->pos[1] = s->pos[1]-(velmax/2);
-		if (s->pos[1] < -50) {
-			Star *saves = s->next;
-			//
-			if (s->prev == NULL) {
-				if (s->next == NULL) {
-					starfield = NULL;
-				} else {
-					s->next->prev = NULL;
-					starfield = s->next;
-				}
-			} else {
-				if (s->next == NULL) {
-					s->prev->next = NULL;
-				} else {
-					s->prev->next = s->next;
-					s->next->prev = s->prev;
-				}
-			}
-			delete s;
-			s = NULL;
-			//
-			if(starfield == NULL) {
-				s = saves;
-			} else {
-				s = starfield;
-			}
-			*stars = *stars-1;
-		}
-	}
-};
-
-void nick_draw_starfield(Star* starfield)
-{
-	Star* s = starfield;
-	while (s) {
-		for (int i=0; i<20; i++) {
-			glColor3f(1.0, 1.0, 1.0);
-			glBegin(GL_POINTS);
-			glVertex2f(s->pos[0],		s->pos[1]);
-			glVertex2f(s->pos[0]-1.0f,	s->pos[1]);
-			glVertex2f(s->pos[0]+1.0f,	s->pos[1]);
-			glVertex2f(s->pos[0],		s->pos[1]-1.0f);
-			glVertex2f(s->pos[0],		s->pos[1]+1.0f);
-			glColor3f(0.8, 0.8, 0.8);
-			glVertex2f(s->pos[0]-1.0f,	s->pos[1]-1.0f);
-			glVertex2f(s->pos[0]-1.0f,	s->pos[1]+1.0f);
-			glVertex2f(s->pos[0]+1.0f,	s->pos[1]-1.0f);
-			glVertex2f(s->pos[0]+1.0f,	s->pos[1]+1.0f);
-			
-			glEnd();
-		}
-		s = s->next;
-	}
-};
-
 void nick_Lab7()
 {
     void nick_divide();
@@ -337,36 +230,40 @@ void nick_drawAsteroid(Flt radius,
 	float trailg;
 	float trailb;
 	float bright;
+	int flicker;
 //	int randfactor = 70;
 
 	//trail 3
 	bright = rand()%70;
+	flicker = rand()%5 - 2;
 	trailr = (255-(bright))/255;
 	trailg = (200-(bright))/255;
 	trailb = 0;
 	circlex = x - radius * velx/7;
 	circley = y - radius * vely/3.5;
-	circler = radius/4;
+	circler = radius/4 + flicker;
 	drawCircle(circler, trailr, trailg, trailb, circlex, circley);
 
 	//trail 2
 	bright = rand()%70;
+	flicker = rand()%5 - 2;
 	trailr = (255-(bright))/255;
 	trailg = (165-(bright))/255;
 	trailb = 0;
 	circlex = x - radius * velx/10;
 	circley = y - radius * vely/5;
-	circler = radius/2;
+	circler = radius/2 + flicker;
 	drawCircle(circler, trailr, trailg, trailb, circlex, circley);
 
 	//trail 1
 	bright = rand()%70;
+	flicker = rand()%5 - 2;
 	trailr = (255-(bright))/255;
 	trailg = (100-(bright))/255;
 	trailb = 0;
 	circlex = x - radius * velx/17;
 	circley = y - radius * vely/8.5;
-	circler = 3*radius/4;
+	circler = 3*radius/4 + flicker;
 	drawCircle(circler, trailr, trailg, trailb, circlex, circley);
 
 	//main circle
@@ -396,4 +293,102 @@ void nick_drawAsteroid(Flt radius,
 
 };
 
+void nick_drawBullet(int posx, int posy)
+{
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_TRIANGLE_STRIP);
+	glVertex2f(posx, posy);
+	glVertex2f(posx-3, posy-9);
+	glVertex2f(posx+3, posy-9);
+	glEnd();
+};
 
+void nick_drawShip(int posx, int posy, int godmode)
+{
+	float godr = 0.7;
+	float godg = 0.7;
+	float godb = 0.0;
+	//head
+	if (!godmode)
+		glColor3f(1.0, 0.1, 0.1);
+	if (godmode)
+		glColor3f(godr, godg, godb);
+	glBegin(GL_TRIANGLE_FAN);
+	glVertex2f(posx, posy);
+	glVertex2f(posx+8, posy);
+	glVertex2f(posx+7, posy+7);
+	glVertex2f(posx, posy+10);
+	glVertex2f(posx-7, posy+7);
+	glVertex2f(posx-8, posy);
+	glEnd();
+
+
+	//cross
+		glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex2f(posx-4, posy-11);
+	glVertex2f(posx+4, posy-11);
+	glVertex2f(posx-4, posy-15);
+	glVertex2f(posx+4, posy-15);
+	glEnd();
+	//body
+	if (!godmode)
+		glColor3f(0.0, 0.7, 0.7);
+	if (godmode)
+		glColor3f(godr, godg, godb);
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex2f(posx-2, posy);
+	glVertex2f(posx+2, posy);
+	glVertex2f(posx-2, posy-15);
+	glVertex2f(posx+2, posy-15);
+	glEnd();
+	glEnd();
+	//eng1
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex2f(posx-9, posy-6);
+	glVertex2f(posx-4, posy-6);
+	glVertex2f(posx-9, posy-20);
+	glVertex2f(posx-4, posy-20);
+	glEnd();
+	//eng2
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex2f(posx+4, posy-6);
+	glVertex2f(posx+9, posy-6);
+	glVertex2f(posx+4, posy-20);
+	glVertex2f(posx+9, posy-20);
+	glEnd();
+	//eng1cap
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex2f(posx-8, posy-6);
+	glVertex2f(posx-6, posy-4);
+	glVertex2f(posx-4, posy-6);
+	glEnd();
+	//eng2cap
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex2f(posx+5, posy-6);
+	glVertex2f(posx+7, posy-4);
+	glVertex2f(posx+9, posy-6);
+	glEnd();
+	//eng1burn
+	float bright1 = rand()%70;
+	float bright2 = rand()%70;
+	float r = (255-(bright1))/255;
+	float g = (100-(bright2))/255;
+	glColor3f(r, g, 0.0);
+	
+	int flicker1 = rand()%5 - 2;
+	int flicker2 = rand()%5 - 2;
+	
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex2f(posx-8, posy-20);
+	glVertex2f(posx-6 + flicker1, posy-26);
+	glVertex2f(posx-4, posy-20);
+	glEnd();
+	//eng2burn;
+	glBegin(GL_TRIANGLE_STRIP);
+	glVertex2f(posx+9, posy-20);
+	glVertex2f(posx+7 + flicker2, posy-26);
+	glVertex2f(posx+5, posy-20);
+	glEnd();
+};
