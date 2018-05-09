@@ -117,36 +117,40 @@ as_PowerUp::as_PowerUp()
 
 }
 
-void as_PowerUp::generatePowerUp()
+void classifyAsteroid(Asteroid *a) 
 {
-	int temp = rand() % 100;
-	if (temp < 90) {
+    int temp = rand() % 100;
+    if (temp < 89) {
+        a->type = 0;
+    }
+    else if (temp < 90 && temp >= 89) {
+        a->type = 1;
+    }
+    else if (temp < 95 && temp >= 90) {
+        a->type = 2;
+    }
+    else {
+        a->type = 3;
+    }
+
+}
+
+void as_PowerUp::generatePowerUp(int type)
+{
+	if (type == 0) {
 		powerUp = SuperBullet;
-	    color[0] = 255;
-		color[1] = 165;
-		color[2] = 0;
 		stock = 1;
 	} 
-    else if (temp >= 90 || temp < 96) {
+    else if (type == 1) {
 		powerUp = GodMode;
-		color[0] = 0;
-		color[1] = 191;
-		color[2] = 255;
         stock = 1;
     }
-    else if (temp >= 96 || temp < 98) {
-        temp = 2;
+    else if (type == 2) {
 		powerUp = ExtraLife;
-		color[0] = 127;
-		color[1] = 255;
-		color[2] = 0;
 		stock = 1;
     }
     else {
 		powerUp = Clear;
-		color[0] = 0;
-		color[1] = 0;
-		color[2] = 0;
 		stock = 1;
     }
     
@@ -154,14 +158,36 @@ void as_PowerUp::generatePowerUp()
 
 }
 
+void assignColors(as_PowerUp *powerUps)
+{
+    //SuperBullet colors
+    powerUps[0].color[0] = 255;
+	powerUps[0].color[1] = 165;
+	powerUps[0].color[2] = 0;
 
-void classifyAsteroid(Asteroid *a, as_PowerUp *powerUps) 
+    //GodMode colors
+	powerUps[1].color[0] = 0;
+	powerUps[1].color[1] = 191;
+	powerUps[1].color[2] = 255;
+
+    //ExtraLife colors
+	powerUps[2].color[0] = 127;
+	powerUps[2].color[1] = 255;
+	powerUps[2].color[2] = 0;
+    
+    //Clear colors
+	powerUps[3].color[0] = 255;
+	powerUps[3].color[1] = 255;
+	powerUps[3].color[2] = 255;
+}
+
+void updatePowerUp(Asteroid *a, as_PowerUp *powerUps, const int POWERUP_RATE) 
 {
 	//generates powerUP based on Asteroid classification number
 
-	if (a->sequence < 5) {
+	if (a->sequence < POWERUP_RATE && a->type != -1) {
 		as_PowerUp temp;
-		temp.generatePowerUp();
+		temp.generatePowerUp(a->type);
 		switch(temp.powerUp) {
 			case SuperBullet:
 				printf("Asteroid classified as SuperBullet Powerup!\n");
@@ -181,26 +207,16 @@ void classifyAsteroid(Asteroid *a, as_PowerUp *powerUps)
 				printf("Asteroid classified as CLearPowerup!\n");
 				powerUps[3].stock += temp.stock;
 				break;
-				
-		
 		}
 	}
 }
 
-void destroyShip() 
+
+void colorPowerUps (Asteroid *a, as_PowerUp *powerUps) 
 {
-
-
-
-}
-
-void colorPowerUps (Asteroid *a) 
-{
-
-
-
-
-
+    for (int i = 0; i < 3; i++) {
+        a->color[i] = (float)powerUps[a->type].color[i]/255.0;
+    }
 
 }
 

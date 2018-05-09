@@ -29,6 +29,7 @@ public:
         Vec vert[8];
         float angle;
 		int sequence;
+        int type;
         float rotate;
         float color[3];
         struct Asteroid *prev;
@@ -40,6 +41,7 @@ public:
                 prev = NULL;
                 next = NULL;
 				sequence = rand() % 100;
+                type = -1;
         }
 };
 
