@@ -392,3 +392,17 @@ void nick_drawShip(int posx, int posy, int godmode)
 	glVertex2f(posx+5, posy-20);
 	glEnd();
 };
+
+int nick_updateGodmode()
+{
+	int limit = 500;
+	static int count  = 0;
+
+	++count;
+	if (count >= limit) {
+		count = 0;
+		return (0);
+	} else {
+		return (1);
+	}
+};

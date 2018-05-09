@@ -206,9 +206,15 @@ public:
 			a->pos[2] = 0.0f;
 			a->angle = 0.0;
 			a->rotate = rnd() * 0.1 - 0.05;
-			a->color[0] = 0.27;
-			a->color[1] = 0.15;
-			a->color[2] = 0.04;
+			if (a->sequence < 5) {
+				a->color[0] = 255.0/255.0;
+				a->color[1] = 215.0/255.0;
+				a->color[2] = 0.0;
+			} else {
+				a->color[0] = 0.27;
+				a->color[1] = 0.15;
+				a->color[2] = 0.04;
+			}
             
 //			a->vel[0] = (Flt)(rnd()*2.0-1.0);
 //			a->vel[1] = (Flt)(rnd()*2.0-1.0);
@@ -359,6 +365,7 @@ extern void nick_drawAsteroid(Flt,
 		float);
 extern void nick_drawBullet(int, int);
 extern void nick_drawShip(int, int, int);
+extern int nick_updateGodmode();
 
 extern int jtL_Lab7() ;
 void init_opengl(void);
@@ -668,6 +675,7 @@ void buildAsteroidFragment(Asteroid *ta, Asteroid *a)
 //	ta->vel[1] = a->vel[1] + (rnd()*2.0-1.0);
 	ta->vel[0] = (rnd()*10.0-5);
 	ta->vel[1] = (rnd()*10.0-5);
+	ta->sequence = a->sequence;
 }
 
 void physics()
@@ -697,6 +705,8 @@ void game_physics_dead()
 }
 void game_physics()
 {
+	if (g.godmode) 
+		g.godmode = nick_updateGodmode();
     if (g.nasteroids < g.max_asteroids){
 			Asteroid *a = new Asteroid;
 //			a->nverts = 8;
@@ -714,9 +724,15 @@ void game_physics()
 			a->pos[2] = 0.0f;
 			a->angle = 0.0;
 			a->rotate = rnd() * 0.1 - 0.05;
-			a->color[0] = 0.27;
-			a->color[1] = 0.15;
-			a->color[2] = 0.04;
+			if (a->sequence < 5) {
+				a->color[0] = 255.0/255.0;
+				a->color[1] = 215.0/255.0;
+				a->color[2] = 0.0;
+			} else {
+				a->color[0] = 0.27;
+				a->color[1] = 0.15;
+				a->color[2] = 0.04;
+			}
 //			a->vel[0] = (Flt)(rnd()*2.0-1.0);
 //			a->vel[1] = (Flt)(rnd()*2.0-1.0);
 			a->vel[0] = 0;
@@ -1066,9 +1082,10 @@ void game_physics()
 
     if (gl.keys[XK_n]) {
 
-        //Activate GodMode goes here
-
-
+		if (g.powerUps[1].stock) {
+			g.godmode = 1;
+			g.powerUps[1].stock = 0;
+		}
 
     }
 	if (gl.keys[XK_v]) {
@@ -1270,15 +1287,43 @@ void game_render()
 */			++b;
 		} else {
 		float x, y;
-		glColor3f(255.0/255.0, 165.0/255.0, 0.0/255.0);
+		float bright1 = rand()%70;
+		float bright2 = rand()%70;
+		float r = (255-(bright1))/255;
+		float g = (165-(bright2))/255;
+
+		int flicker = rand()%20 - 10;
+		glColor3f(r, g, 0.0);
 		glBegin(GL_TRIANGLE_FAN);
 		for (int i=0; i<180; i++){
-			x = SUPERSIZE * cos(i) + b->pos[0];
-			y = SUPERSIZE * sin(i) + b->pos[1];
+			int radius = SUPERSIZE + flicker;
+
+			x = radius * cos(i) + b->pos[0];
+			y = radius * sin(i) + b->pos[1];
 			glVertex3f (x, y, 0);
 
-			x = SUPERSIZE * cos (i+0.1) + b->pos[0];
-			y = SUPERSIZE * sin (i+0.1) + b->pos[1];
+			x = radius * cos (i+0.1) + b->pos[0];
+			y = radius * sin (i+0.1) + b->pos[1];
+			glVertex3f (x, y, 0);
+			}
+		glEnd();
+		bright1 = rand()%70;
+		bright2 = rand()%70;
+		r = (255-(bright1))/255;
+		g = (165-(bright2))/255;
+
+		flicker = rand()%20 - 10;
+		glColor3f(r, g, 0.0);
+		glBegin(GL_TRIANGLE_FAN);
+		for (int i=0; i<180; i++){
+			int radius = SUPERSIZE + flicker - 20;
+
+			x = radius * cos(i) + b->pos[0];
+			y = radius * sin(i) + b->pos[1];
+			glVertex3f (x, y, 0);
+
+			x = radius * cos (i+0.1) + b->pos[0];
+			y = radius * sin (i+0.1) + b->pos[1];
 			glVertex3f (x, y, 0);
 			}
 		glEnd();
