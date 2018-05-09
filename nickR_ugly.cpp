@@ -22,61 +22,61 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 
 void nick_Lab7()
 {
-	void nick_divide();
-	void nick_divide_opt();
+    void nick_divide();
+    void nick_divide_opt();
 
-	Rect r;
-	r.bot = 430;
-	r.left = 10;
-	r.center = 0;
-	ggprint8b(&r, 16, 0x0088bbff, "Nick Rosbrugh");
-	nick_divide();
-	nick_divide_opt();
+    Rect r;
+    r.bot = 430;
+    r.left = 10;
+    r.center = 0;
+    ggprint8b(&r, 16, 0x0088bbff, "Nick Rosbrugh");
+    nick_divide();
+    nick_divide_opt();
 }
 
 void nick_divide()
 {
-	struct timespec start, end;
-	static double diff = 0.0;
-	clock_gettime(CLOCK_REALTIME, &start);
-	//timer started
-
-	long int a = 1125899906842624;
-	int b = 2;
-	for (int i=0; i<50; i++) {
+    struct timespec start, end;
+    static double diff = 0.0;
+    clock_gettime(CLOCK_REALTIME, &start);
+    //timer started
+    
+    long int a = 1125899906842624;
+    int b = 2;
+    for (int i=0; i<50; i++) {
 		a = a/b;
-	}
+    }
 
-	//get and print time
-	clock_gettime(CLOCK_REALTIME, &end);
-	diff += timeDiff(&start, &end);
-	Rect r;
-	r.bot = 415;
-	r.left = 10;
-	r.center = 0;
-	ggprint8b(&r, 16, 0x0088bbff, "timer____: %lf", diff);
+    //get and print time
+    clock_gettime(CLOCK_REALTIME, &end);
+    diff += timeDiff(&start, &end);
+    Rect r;
+    r.bot = 415;
+    r.left = 10;
+    r.center = 0;
+    ggprint8b(&r, 16, 0x0088bbff, "timer____: %lf", diff);
 }
 
 void nick_divide_opt()
 {
-	struct timespec start, end;
-	static double diff = 0.0;
-	clock_gettime(CLOCK_REALTIME, &start);
-	//timer started
-
-	long int a = 1125899906842624;
-	for (int i=0; i<50; i++) {
+    struct timespec start, end;
+    static double diff = 0.0;
+    clock_gettime(CLOCK_REALTIME, &start);
+    //timer started
+    
+    long int a = 1125899906842624;
+    for (int i=0; i<50; i++) {
 		a >>= 1;
-	}
+    }
 
-	//get and print time
-	clock_gettime(CLOCK_REALTIME, &end);
-	diff += timeDiff(&start, &end);
-	Rect r;
-	r.bot = 400;
-	r.left = 10;
-	r.center = 0;
-	ggprint8b(&r, 16, 0x0088bbff, "timer_opt: %lf", diff);
+    //get and print time
+    clock_gettime(CLOCK_REALTIME, &end);
+    diff += timeDiff(&start, &end);
+    Rect r;
+    r.bot = 400;
+    r.left = 10;
+    r.center = 0;
+    ggprint8b(&r, 16, 0x0088bbff, "timer_opt: %lf", diff);
 }
 
 int nick_dead(int shipXpos, int shipYpos, Asteroid* a)
@@ -93,19 +93,19 @@ int nick_dead(int shipXpos, int shipYpos, Asteroid* a)
 
 void nick_explosion(float X, float Y)
 {
-	Flt xe,ye,r;
-	glBegin(GL_LINES);
+    Flt xe,ye,r;
+    glBegin(GL_LINES);
 	for (int i=0; i<360; i++) {
 		r = rnd()*40.0+20.0;
 		xe = r*sin(i);
 		ye = r*cos(i);
-		glColor3f(rnd()*.3+.7, rnd()*.3+.7, 0);
-		glVertex2f(X, Y);
-		glVertex2f(X+xe, Y+ye);
+	    glColor3f(rnd()*.3+.7, rnd()*.3+.7, 0);
+	    glVertex2f(X, Y);
+	    glVertex2f(X+xe, Y+ye);
 	}
 	glEnd();
-
-	return;
+		
+    return;
 };
 
 void nick_reset(int* dead, Asteroid *ahead, int* nasteroids)
@@ -149,10 +149,10 @@ void nick_drawContinue(int xLim, int yLim, int lives, int score)
 	r.width = 85;
 	glColor3ub(100, 0, 20);
 	glBegin(GL_QUADS);
-	glVertex2i(r.centerx-r.width, r.centery-r.height);
-	glVertex2i(r.centerx-r.width, r.centery+r.height);
-	glVertex2i(r.centerx+r.width, r.centery+r.height);
-	glVertex2i(r.centerx+r.width, r.centery-r.height);
+		glVertex2i(r.centerx-r.width, r.centery-r.height);
+		glVertex2i(r.centerx-r.width, r.centery+r.height);
+		glVertex2i(r.centerx+r.width, r.centery+r.height);
+		glVertex2i(r.centerx+r.width, r.centery-r.height);
 	glEnd();
 	glPopMatrix();
 
@@ -162,11 +162,11 @@ void nick_drawContinue(int xLim, int yLim, int lives, int score)
 	r.width = 80;
 	glColor3ub(20, 20, 20);
 	glBegin(GL_QUADS);
-	glVertex2i(r.centerx-r.width, r.centery-r.height);
-	glVertex2i(r.centerx-r.width, r.centery+r.height);
-	glVertex2i(r.centerx+r.width, r.centery+r.height);
-	glVertex2i(r.centerx+r.width, r.centery-r.height);
-	glEnd();
+		glVertex2i(r.centerx-r.width, r.centery-r.height);
+		glVertex2i(r.centerx-r.width, r.centery+r.height);
+		glVertex2i(r.centerx+r.width, r.centery+r.height);
+		glVertex2i(r.centerx+r.width, r.centery-r.height);
+    glEnd();
 
 	if (lives)
 	{
@@ -231,6 +231,7 @@ void nick_drawAsteroid(Flt radius,
 	float trailb;
 	float bright;
 	int flicker;
+//	int randfactor = 70;
 
 	//trail 3
 	bright = rand()%70;
@@ -268,7 +269,7 @@ void nick_drawAsteroid(Flt radius,
 	//main circle
 	drawCircle(radius+1, 0,0,0, x, y);
 	drawCircle(radius, r, g, b, x, y);
-
+	
 	//crater 1
 	circlex = radius/3 * cos(angle) + x;
 	circley = radius/3 * sin(angle) + y;
@@ -294,8 +295,8 @@ void nick_drawAsteroid(Flt radius,
 
 void nick_drawBullet(int posx, int posy)
 {
-	glColor3f(1.0, 1.0, 1.0);
-	glBegin(GL_TRIANGLE_STRIP);
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_TRIANGLE_STRIP);
 	glVertex2f(posx, posy);
 	glVertex2f(posx-3, posy-9);
 	glVertex2f(posx+3, posy-9);
@@ -323,7 +324,7 @@ void nick_drawShip(int posx, int posy, int godmode)
 
 
 	//cross
-	glColor3f(1.0, 1.0, 1.0);
+		glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_TRIANGLE_STRIP);
 	glVertex2f(posx-4, posy-11);
 	glVertex2f(posx+4, posy-11);
@@ -375,10 +376,10 @@ void nick_drawShip(int posx, int posy, int godmode)
 	float r = (255-(bright1))/255;
 	float g = (100-(bright2))/255;
 	glColor3f(r, g, 0.0);
-
+	
 	int flicker1 = rand()%5 - 2;
 	int flicker2 = rand()%5 - 2;
-
+	
 	glBegin(GL_TRIANGLE_STRIP);
 	glVertex2f(posx-8, posy-20);
 	glVertex2f(posx-6 + flicker1, posy-26);
