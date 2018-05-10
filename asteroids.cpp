@@ -916,6 +916,10 @@ void game_physics()
 		}  
 	}
 
+	if (gl.keys[XK_c]) {
+			g.godmode = 1;
+
+	}
 	if (gl.keys[XK_n]) {
 
 		if (g.powerUps[1].stock) {
