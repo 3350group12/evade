@@ -57,8 +57,13 @@ extern void timeCopy(struct timespec *dest, struct timespec *source);
 extern void classifyAsteroid(Asteroid *a);
 extern void colorPowerUps(Asteroid *a, as_PowerUp *powerUps);
 extern void updatePowerUp(Asteroid *a, as_PowerUp *powerUps,
-		const int POWERUP_RATE);
+		int &lives, const int POWERUP_RATE);
 extern void assignColors(as_PowerUp *powerUps);
+extern void uploadScores(int points, char *user, int size = 32);
+extern void neuralNetwork(double &pixel, int res, double curPos,
+        double prevPos = -1);
+extern double calcAngle(double astx, double asty,
+        double predx, double predy);
 
 extern void nick_Lab7();
 extern void nick_explosion(float, float);
@@ -177,8 +182,10 @@ class Game {
 		Asteroid *ahead;	
 		Bullet *barr;
 		as_PowerUp *powerUps;
+        char user[32];
 		int dead;
 		int lives;
+        double pixel;
 		int godmode;
 		int max_asteroids;
 		int nasteroids;
@@ -212,6 +219,7 @@ class Game {
 				if (a->sequence < POWERUP_RATE) {
 					classifyAsteroid(a);
 				}
+                neuralNetwork(pixel, gl.xres, ship.pos[0]);
 				a->radius = rnd()*20.0 + 30.0;
 				a->pos[0] = (Flt)(rand() % gl.xres);
 				a->pos[1] = (Flt)(gl.yres + 100);
@@ -602,6 +610,9 @@ void game_physics_dead()
 	}
 	if (gl.keys[XK_n]) {
 		//if we get a menu, make this go to menu instead
+        cout << "Enter username: ";
+        cin.getline(g.user, 32);
+        uploadScores(g.asterdestroyed, g.user);
 		exit(0);
 	}
 	return;
@@ -615,6 +626,8 @@ void game_physics()
 		if (a->sequence < POWERUP_RATE) {
 			classifyAsteroid(a);
 		}
+
+        neuralNetwork(g.pixel, gl.xres, g.ship.pos[0]);
 		a->radius = rnd()*20.0 + 30.0;
 		a->pos[0] = (Flt)(rand() % gl.xres);
 		a->pos[1] = (Flt)(rand() % gl.yres + gl.yres + 100);
@@ -731,7 +744,7 @@ void game_physics()
 			if (dist < (a->radius*a->radius) && !b->super) {
 				//cout << "asteroid hit." << endl;
 				//this asteroid is hit.
-				updatePowerUp(a, g.powerUps, POWERUP_RATE);
+				updatePowerUp(a, g.powerUps, g.lives, POWERUP_RATE);
 				if (a->radius >= MINIMUM_ASTEROID_SIZE) {
 					//break it into pieces.
 					Asteroid *ta = a;
@@ -834,9 +847,11 @@ void game_physics()
 	//check keys pressed now
 	if (gl.keys[XK_Left]) {
 		g.ship.pos[0] -= SHIPSPEED;
+        neuralNetwork(g.pixel, gl.xres, g.ship.pos[0]);
 	}
 	if (gl.keys[XK_Right]) {
 		g.ship.pos[0] += SHIPSPEED;
+        neuralNetwork(g.pixel, gl.xres, g.ship.pos[0]);
 	}
 	//check ship window edge
 	if (g.ship.pos[0] < 0.0) {

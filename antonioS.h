@@ -22,4 +22,21 @@ public:
 
 };
 
+
+class Neuron {
+    public:
+        double *feat;
+        int numFeat;
+        double delta;
+        double *weight;
+        double theta;
+        double charge;
+        double output;
+        void init(int size);
+        void fCharge();
+        void activate();
+        Neuron();
+};
+
+
 #endif
