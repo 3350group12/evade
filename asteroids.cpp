@@ -918,6 +918,9 @@ void game_physics()
 
 	if (gl.keys[XK_c]) {
 			g.godmode = 1;
+			for (int i = 0; i < 4; i++) {
+			    g.powerUps[i].stock = 999;
+			}
 
 	}
 	if (gl.keys[XK_n]) {
