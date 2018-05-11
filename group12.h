@@ -1,0 +1,19 @@
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <iostream>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <cmath>
+#include <stdlib.h>
+
+#include <unistd.h>
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+#include <GL/glx.h>
+#include "log.h"
+#include "fonts.h"
+#include "Asteroid.h"
+#include "Bullet.h"
+#include "antonioS.h"
